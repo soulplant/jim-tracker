@@ -20,10 +20,10 @@ func NewApiService() *apiService {
 			Id:        "1",
 			Done:      true,
 			Name:      "Kazam! It's Kubernetes!",
-			SpeakerId: "1",
+			SpeakerId: "0",
 		}},
 		user: []*api.User{&api.User{
-			Id:   "1",
+			Id:   "0",
 			Name: "James",
 		}},
 		nextId: 2,
@@ -50,4 +50,21 @@ func (s *apiService) AddUser(ctx context.Context, req *api.AddUserRequest) (*api
 	return &api.AddUserResponse{
 		User: user,
 	}, nil
+}
+
+func (s *apiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api.AddTalkResponse, error) {
+	talk := &api.Talk{
+		Id:        s.allocateId(),
+		SpeakerId: req.GetUserId(),
+	}
+	s.talk = append(s.talk, talk)
+	return &api.AddTalkResponse{
+		Talk: talk,
+	}, nil
+}
+
+func (s *apiService) allocateId() string {
+	result := s.nextId
+	s.nextId += 1
+	return fmt.Sprintf("%d", result)
 }

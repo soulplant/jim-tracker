@@ -31,6 +31,32 @@
         ]
       }
     },
+    "/v1/talk": {
+      "post": {
+        "operationId": "AddTalk",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiAddTalkResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiAddTalkRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ApiService"
+        ]
+      }
+    },
     "/v1/user": {
       "post": {
         "operationId": "AddUser",
@@ -59,6 +85,22 @@
     }
   },
   "definitions": {
+    "apiAddTalkRequest": {
+      "type": "object",
+      "properties": {
+        "user_id": {
+          "type": "string"
+        }
+      }
+    },
+    "apiAddTalkResponse": {
+      "type": "object",
+      "properties": {
+        "talk": {
+          "$ref": "#/definitions/apiTalk"
+        }
+      }
+    },
     "apiAddUserRequest": {
       "type": "object",
       "properties": {

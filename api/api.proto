@@ -34,6 +34,14 @@ message AddUserResponse {
   User user = 1;
 }
 
+message AddTalkRequest {
+  string user_id = 1;
+}
+
+message AddTalkResponse {
+  Talk talk = 1;
+}
+
 service ApiService {
   rpc FetchAll (FetchAllRequest) returns (FetchAllResponse) {
     option (google.api.http) = {
@@ -44,6 +52,13 @@ service ApiService {
   rpc AddUser (AddUserRequest) returns (AddUserResponse) {
     option (google.api.http) = {
       post: "/v1/user"
+      body: "*"
+    };
+  }
+
+  rpc AddTalk (AddTalkRequest) returns (AddTalkResponse) {
+    option (google.api.http) = {
+      post: "/v1/talk"
       body: "*"
     };
   }
