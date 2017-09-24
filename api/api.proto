@@ -1,0 +1,50 @@
+syntax = "proto3";
+
+package api;
+
+import "google/api/annotations.proto";
+
+message User {
+  string id = 1;
+  string name = 2;
+}
+
+message Talk {
+  string id = 1;
+  string name = 2;
+  string speaker_id = 3;
+  bool done = 4;
+  repeated string url = 5;
+}
+
+message FetchAllRequest {
+}
+
+message FetchAllResponse {
+  repeated User user = 1;
+  repeated Talk talk = 2;
+}
+
+message AddUserRequest {
+  string name = 1;
+}
+
+message AddUserResponse {
+  // The newly added user.
+  User user = 1;
+}
+
+service ApiService {
+  rpc FetchAll (FetchAllRequest) returns (FetchAllResponse) {
+    option (google.api.http) = {
+      get: "/v1/fetch-all"
+    };
+  }
+
+  rpc AddUser (AddUserRequest) returns (AddUserResponse) {
+    option (google.api.http) = {
+      post: "/v1/user"
+      body: "*"
+    };
+  }
+}
