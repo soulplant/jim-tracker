@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/soulplant/talk-tracker/api"
@@ -53,6 +54,9 @@ func (s *apiService) AddUser(ctx context.Context, req *api.AddUserRequest) (*api
 }
 
 func (s *apiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api.AddTalkResponse, error) {
+	if len(req.GetUserId()) == 0 {
+		return nil, errors.New("user_id required")
+	}
 	talk := &api.Talk{
 		Id:        s.allocateId(),
 		SpeakerId: req.GetUserId(),
