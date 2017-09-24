@@ -38,7 +38,7 @@ func main() {
 		}
 		rpcServer := grpc.NewServer()
 		reflection.Register(rpcServer)
-		api.RegisterApiServiceServer(rpcServer, &apiService{})
+		api.RegisterApiServiceServer(rpcServer, NewApiService())
 		fmt.Printf("Listening for gRPC on %s\n", grpcPort)
 		log.Fatal(rpcServer.Serve(lis))
 	}()
