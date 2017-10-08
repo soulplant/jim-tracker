@@ -31,6 +31,33 @@
         ]
       }
     },
+    "/v1/reorder": {
+      "post": {
+        "summary": "Change the position of one user in the list of upcoming talks.",
+        "operationId": "Reorder",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiReorderResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiReorderRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ApiService"
+        ]
+      }
+    },
     "/v1/talk": {
       "post": {
         "operationId": "AddTalk",
@@ -58,6 +85,20 @@
       }
     },
     "/v1/user": {
+      "get": {
+        "operationId": "GetUsers",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiGetUsersResponse"
+            }
+          }
+        },
+        "tags": [
+          "ApiService"
+        ]
+      },
       "post": {
         "operationId": "AddUser",
         "responses": {
@@ -88,7 +129,7 @@
     "apiAddTalkRequest": {
       "type": "object",
       "properties": {
-        "user_id": {
+        "userId": {
           "type": "string"
         }
       }
@@ -121,6 +162,9 @@
     "apiFetchAllResponse": {
       "type": "object",
       "properties": {
+        "version": {
+          "type": "string"
+        },
         "user": {
           "type": "array",
           "items": {
@@ -135,6 +179,52 @@
         }
       }
     },
+    "apiGetUsersResponse": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "format": "int64"
+        },
+        "user": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiUser"
+          }
+        }
+      }
+    },
+    "apiReorderRequest": {
+      "type": "object",
+      "properties": {
+        "version": {
+          "type": "string",
+          "format": "int64"
+        },
+        "moveUserId": {
+          "type": "string"
+        },
+        "anchorUserId": {
+          "type": "string"
+        },
+        "before": {
+          "type": "boolean",
+          "format": "boolean"
+        }
+      }
+    },
+    "apiReorderResponse": {
+      "type": "object",
+      "properties": {
+        "accepted": {
+          "type": "boolean",
+          "format": "boolean"
+        },
+        "version": {
+          "type": "string"
+        }
+      }
+    },
     "apiTalk": {
       "type": "object",
       "properties": {
@@ -144,7 +234,7 @@
         "name": {
           "type": "string"
         },
-        "speaker_id": {
+        "speakerId": {
           "type": "string"
         },
         "done": {
@@ -166,6 +256,9 @@
           "type": "string"
         },
         "name": {
+          "type": "string"
+        },
+        "nextTalk": {
           "type": "string"
         }
       }

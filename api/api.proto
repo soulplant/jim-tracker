@@ -7,12 +7,13 @@ import "google/api/annotations.proto";
 message User {
   string id = 1;
   string name = 2;
+  string nextTalk = 3;
 }
 
 message Talk {
   string id = 1;
   string name = 2;
-  string speaker_id = 3;
+  string speakerId = 3;
   bool done = 4;
   repeated string url = 5;
 }
@@ -21,8 +22,9 @@ message FetchAllRequest {
 }
 
 message FetchAllResponse {
-  repeated User user = 1;
-  repeated Talk talk = 2;
+  string version = 1;
+  repeated User user = 2;
+  repeated Talk talk = 3;
 }
 
 message AddUserRequest {
@@ -35,11 +37,31 @@ message AddUserResponse {
 }
 
 message AddTalkRequest {
-  string user_id = 1;
+  string userId = 1;
 }
 
 message AddTalkResponse {
   Talk talk = 1;
+}
+
+message ReorderRequest {
+  int64 version = 1;
+  string moveUserId = 2;
+  string anchorUserId = 3;
+  bool before = 4;
+}
+
+message ReorderResponse {
+  bool accepted = 1;
+  string version = 2;
+}
+
+message GetUsersRequest {
+}
+
+message GetUsersResponse {
+  int64 version = 1;
+  repeated User user = 2;
 }
 
 service ApiService {
@@ -49,9 +71,23 @@ service ApiService {
     };
   }
 
+  rpc GetUsers (GetUsersRequest) returns (GetUsersResponse) {
+    option (google.api.http) = {
+      get: "/v1/user"
+    };
+  }
+
   rpc AddUser (AddUserRequest) returns (AddUserResponse) {
     option (google.api.http) = {
       post: "/v1/user"
+      body: "*"
+    };
+  }
+
+  // Change the position of one user in the list of upcoming talks.
+  rpc Reorder (ReorderRequest) returns (ReorderResponse) {
+    option (google.api.http) = {
+      post: "/v1/reorder"
       body: "*"
     };
   }

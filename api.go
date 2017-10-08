@@ -16,19 +16,18 @@ type apiService struct {
 }
 
 func NewApiService() *apiService {
-	return &apiService{
-		talk: []*api.Talk{&api.Talk{
-			Id:        "1",
-			Done:      true,
-			Name:      "Kazam! It's Kubernetes!",
-			SpeakerId: "0",
-		}},
-		user: []*api.User{&api.User{
-			Id:   "0",
-			Name: "James",
-		}},
-		nextId: 2,
-	}
+	return &apiService{}
+}
+
+func NewTestApiService() *apiService {
+	a := NewApiService()
+	a.PopulateWithTestData()
+	return a
+}
+
+func (s *apiService) PopulateWithTestData() {
+	s.AddUser(context.Background(), &api.AddUserRequest{Name: "James"})
+	s.AddUser(context.Background(), &api.AddUserRequest{Name: "Anu"})
 }
 
 func (s *apiService) FetchAll(context.Context, *api.FetchAllRequest) (*api.FetchAllResponse, error) {
@@ -64,6 +63,55 @@ func (s *apiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api
 	s.talk = append(s.talk, talk)
 	return &api.AddTalkResponse{
 		Talk: talk,
+	}, nil
+}
+
+func (s *apiService) Reorder(ctx context.Context, req *api.ReorderRequest) (*api.ReorderResponse, error) {
+	ai, err := s.indexOfUser(req.AnchorUserId)
+	if err != nil {
+		return nil, err
+	}
+	mi, err := s.indexOfUser(req.MoveUserId)
+	if err != nil {
+		return nil, err
+	}
+	ins := ai
+	if !req.GetBefore() {
+		ins += 1
+	}
+	if mi < ai {
+		var tmp []*api.User
+		tmp = append(tmp, s.user[:mi]...)
+		tmp = append(tmp, s.user[mi+1:ins]...)
+		tmp = append(tmp, s.user[mi])
+		tmp = append(tmp, s.user[ins:]...)
+		s.user = tmp
+	} else {
+		var tmp []*api.User
+		tmp = append(tmp, s.user[:ins]...)
+		tmp = append(tmp, s.user[mi])
+		tmp = append(tmp, s.user[ins:mi]...)
+		tmp = append(tmp, s.user[mi+1:]...)
+		s.user = tmp
+	}
+
+	return &api.ReorderResponse{
+		Accepted: true,
+	}, nil
+}
+
+func (s *apiService) indexOfUser(userId string) (int, error) {
+	for i, u := range s.user {
+		if u.GetId() == userId {
+			return i, nil
+		}
+	}
+	return 0, fmt.Errorf("Failed to get index of user %s", userId)
+}
+
+func (s *apiService) GetUsers(ctx context.Context, req *api.GetUsersRequest) (*api.GetUsersResponse, error) {
+	return &api.GetUsersResponse{
+		User: s.user,
 	}, nil
 }
 
