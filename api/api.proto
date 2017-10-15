@@ -64,6 +64,22 @@ message GetUsersResponse {
   repeated User user = 2;
 }
 
+message UpdateUserRequest {
+  string userId = 1;
+  string name = 2;
+  string nextTalkName = 3;
+}
+
+message UpdateUserResponse {
+}
+
+message RemoveUserRequest {
+  string userId = 1;
+}
+
+message RemoveUserResponse {
+}
+
 service ApiService {
   rpc FetchAll (FetchAllRequest) returns (FetchAllResponse) {
     option (google.api.http) = {
@@ -81,6 +97,19 @@ service ApiService {
     option (google.api.http) = {
       post: "/v1/user"
       body: "*"
+    };
+  }
+
+  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {
+    option (google.api.http) = {
+      patch: "/v1/user/{userId}"
+      body: "*"
+    };
+  }
+
+  rpc RemoveUser (RemoveUserRequest) returns (RemoveUserResponse) {
+    option (google.api.http) = {
+      delete: "/v1/user/{userId}"
     };
   }
 

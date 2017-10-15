@@ -100,6 +100,29 @@ func (s *apiService) Reorder(ctx context.Context, req *api.ReorderRequest) (*api
 	}, nil
 }
 
+func (s *apiService) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (*api.UpdateUserResponse, error) {
+	i, err := s.indexOfUser(req.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+	if req.GetName() != "" {
+		s.user[i].Name = req.GetName()
+	}
+	if req.GetNextTalkName() != "" {
+		s.user[i].NextTalk = req.GetNextTalkName()
+	}
+	return &api.UpdateUserResponse{}, nil
+}
+
+func (s *apiService) RemoveUser(ctx context.Context, req *api.RemoveUserRequest) (*api.RemoveUserResponse, error) {
+	i, err := s.indexOfUser(req.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+	s.user = append(s.user[:i], s.user[i+1:]...)
+	return &api.RemoveUserResponse{}, nil
+}
+
 func (s *apiService) indexOfUser(userId string) (int, error) {
 	for i, u := range s.user {
 		if u.GetId() == userId {

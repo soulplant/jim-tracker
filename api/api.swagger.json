@@ -123,6 +123,60 @@
           "ApiService"
         ]
       }
+    },
+    "/v1/user/{userId}": {
+      "delete": {
+        "operationId": "RemoveUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiRemoveUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "tags": [
+          "ApiService"
+        ]
+      },
+      "patch": {
+        "operationId": "UpdateUser",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiUpdateUserResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "userId",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiUpdateUserRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ApiService"
+        ]
+      }
     }
   },
   "definitions": {
@@ -194,6 +248,9 @@
         }
       }
     },
+    "apiRemoveUserResponse": {
+      "type": "object"
+    },
     "apiReorderRequest": {
       "type": "object",
       "properties": {
@@ -248,6 +305,23 @@
           }
         }
       }
+    },
+    "apiUpdateUserRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "nextTalkName": {
+          "type": "string"
+        }
+      }
+    },
+    "apiUpdateUserResponse": {
+      "type": "object"
     },
     "apiUser": {
       "type": "object",
