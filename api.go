@@ -123,6 +123,19 @@ func (s *apiService) RemoveUser(ctx context.Context, req *api.RemoveUserRequest)
 	return &api.RemoveUserResponse{}, nil
 }
 
+func (s *apiService) CompleteTalk(ctx context.Context, req *api.CompleteTalkRequest) (*api.CompleteTalkResponse, error) {
+	i, err := s.indexOfUser(req.GetUserId())
+	if err != nil {
+		return nil, err
+	}
+	user := s.user[i]
+	user.NextTalk = ""
+	// TODO(james): Record the fact that the talk happened.
+	s.user = append(s.user[:i], s.user[i+1:]...)
+	s.user = append(s.user, user)
+	return &api.CompleteTalkResponse{}, nil
+}
+
 func (s *apiService) indexOfUser(userId string) (int, error) {
 	for i, u := range s.user {
 		if u.GetId() == userId {
