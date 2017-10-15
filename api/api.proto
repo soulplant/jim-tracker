@@ -80,6 +80,14 @@ message RemoveUserRequest {
 message RemoveUserResponse {
 }
 
+message CompleteTalkRequest {
+  string userId = 1;
+}
+
+message CompleteTalkResponse {
+
+}
+
 service ApiService {
   rpc FetchAll (FetchAllRequest) returns (FetchAllResponse) {
     option (google.api.http) = {
@@ -124,6 +132,13 @@ service ApiService {
   rpc AddTalk (AddTalkRequest) returns (AddTalkResponse) {
     option (google.api.http) = {
       post: "/v1/talk"
+      body: "*"
+    };
+  }
+
+  rpc CompleteTalk (CompleteTalkRequest) returns (CompleteTalkResponse) {
+    option (google.api.http) = {
+      post: "/v1/talk/complete"
       body: "*"
     };
   }
