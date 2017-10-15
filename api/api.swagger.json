@@ -84,6 +84,32 @@
         ]
       }
     },
+    "/v1/talk/complete": {
+      "post": {
+        "operationId": "CompleteTalk",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiCompleteTalkResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiCompleteTalkRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ApiService"
+        ]
+      }
+    },
     "/v1/user": {
       "get": {
         "operationId": "GetUsers",
@@ -212,6 +238,17 @@
           "description": "The newly added user."
         }
       }
+    },
+    "apiCompleteTalkRequest": {
+      "type": "object",
+      "properties": {
+        "userId": {
+          "type": "string"
+        }
+      }
+    },
+    "apiCompleteTalkResponse": {
+      "type": "object"
     },
     "apiFetchAllResponse": {
       "type": "object",
