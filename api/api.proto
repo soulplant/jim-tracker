@@ -4,6 +4,12 @@ package api;
 
 import "google/api/annotations.proto";
 
+message ServerState {
+    repeated User user = 1;
+    repeated Talk talk = 2;
+    int32 nextId = 3;
+}
+
 message User {
   string id = 1;
   string name = 2;
@@ -67,7 +73,7 @@ message GetUsersResponse {
 message UpdateUserRequest {
   string userId = 1;
   string name = 2;
-  string nextTalkName = 3;
+  string nextTalk = 3;
 }
 
 message UpdateUserResponse {

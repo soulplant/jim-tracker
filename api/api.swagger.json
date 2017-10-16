@@ -352,7 +352,7 @@
         "name": {
           "type": "string"
         },
-        "nextTalkName": {
+        "nextTalk": {
           "type": "string"
         }
       }

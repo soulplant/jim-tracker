@@ -60,7 +60,7 @@ func Test_reorder__invalid_users(t *testing.T) {
 func addUser(t *testing.T, a *apiService, name string) string {
 	u, err := a.AddUser(context.Background(), &api.AddUserRequest{Name: name})
 	if err != nil {
-		t.Errorf("failed to add user '%s'", name)
+		t.Errorf("failed to add User '%s'", name)
 	}
 	return u.GetUser().GetId()
 }

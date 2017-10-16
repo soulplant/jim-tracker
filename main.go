@@ -1,9 +1,12 @@
 package main
 
 import (
+	"flag"
 	"fmt"
 	"log"
 	"net/http"
+
+	"cloud.google.com/go/datastore"
 
 	"context"
 	"net"
@@ -18,6 +21,8 @@ import (
 const port = ":1234"
 const grpcPort = "127.0.0.1:1235"
 
+var projectId = flag.String("projectId", "dev", "The GCP project to connect to")
+
 //go:generate ./gen-protos.sh
 
 func main() {
@@ -28,9 +33,29 @@ func main() {
 	api.RegisterApiServiceHandlerFromEndpoint(ctx, apiMux, grpcPort, []grpc.DialOption{grpc.WithInsecure()})
 	http.Handle("/api/", http.StripPrefix("/api", apiMux))
 	http.HandleFunc("/files/", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Add("Access-Control-Allow-Origin", "*")
+		// w.Header().Add("Access-Control-Allow-Origin", "*")
 		http.StripPrefix("/files/", http.FileServer(http.Dir("."))).ServeHTTP(w, r)
 	})
+
+	client, err := datastore.NewClient(ctx, *projectId)
+	if err != nil {
+		log.Fatalf("Couldn't create datastore client %v", err)
+	}
+	data := api.ServerState{
+		User: []*api.User{},
+		Talk: []*api.Talk{},
+		NextId: 0,
+	}
+	key := datastore.NameKey("Root", "data", nil)
+	if err := client.Get(ctx, key, &data); err != nil {
+		fmt.Println("Data doesn't exist in datastore, so creating fresh one")
+		if _, err := client.Put(ctx, key, &data); err != nil {
+			log.Fatalf("Couldn't create initial data: %v", err)
+		}
+	} else {
+		fmt.Printf("got %v\n", data)
+	}
+
 	go func() {
 		lis, err := net.Listen("tcp", grpcPort)
 		if err != nil {
@@ -38,12 +63,12 @@ func main() {
 		}
 		rpcServer := grpc.NewServer()
 		reflection.Register(rpcServer)
-		api.RegisterApiServiceServer(rpcServer, NewApiService())
+		api.RegisterApiServiceServer(rpcServer, NewDsApiService(client, key))
 		fmt.Printf("Listening for gRPC on %s\n", grpcPort)
 		log.Fatal(rpcServer.Serve(lis))
 	}()
 	fmt.Printf("Listening for HTTP on %s\n", port)
-	err := http.ListenAndServe(port, nil)
+	err = http.ListenAndServe(port, nil)
 	if err != nil {
 		fmt.Println("Failed to listen", err)
 	}
