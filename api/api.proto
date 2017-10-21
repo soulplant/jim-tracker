@@ -11,6 +11,11 @@ message ServerState {
     int64 nextId = 3;
 }
 
+message RootData {
+  // The ids of users in the order that they are scheduled to give a talk.
+  repeated int64 order = 1;
+}
+
 message User {
   int64 id = 1;
   string name = 2;

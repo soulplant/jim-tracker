@@ -21,9 +21,7 @@ func NewDsApiService(client *datastore.Client) *dsApiService {
 	return &dsApiService{key, client}
 }
 
-type rootData struct {
-	Order []int64
-}
+type rootData api.RootData
 
 func (s *dsApiService) Close() {
 	s.client.Close()
