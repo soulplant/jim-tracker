@@ -12,6 +12,7 @@ A webapp that tracks whose turn it is to give a talk on Friday using:
 
 There are two repositories for this project, one for the client and one for the server. All generated code is checked in, so to get a dev environment:
 
+1. Install protoc
 1. Install the gcloud tool and the datastore emulator (see [1])
 1. $(gcloud beta emulators datastore env-init)
 1. gcloud beta emulators datastore start
