@@ -4,19 +4,9 @@ import (
 	"errors"
 	"fmt"
 
-	"cloud.google.com/go/datastore"
-
 	"github.com/soulplant/talk-tracker/api"
 	context "golang.org/x/net/context"
 )
-
-func userKey(id int64) *datastore.Key {
-	return datastore.IDKey("user", id, nil)
-}
-
-func talkKey(id string) *datastore.Key {
-	return datastore.NameKey("talk", id, nil)
-}
 
 type apiService api.ServerState
 

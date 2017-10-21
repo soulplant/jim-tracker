@@ -3,7 +3,6 @@ syntax = "proto3";
 package api;
 
 import "google/api/annotations.proto";
-import "google/protobuf/Timestamp.proto";
 
 message ServerState {
     repeated User user = 1;
@@ -28,7 +27,9 @@ message Talk {
   int64 speakerId = 3;
   bool done = 4;
   repeated string url = 5;
-  google.protobuf.Timestamp completed = 6;
+
+  // Timestamp for when this task was completed in seconds from the epoch.
+  int64 completedSeconds = 6;
 }
 
 message FetchAllRequest {
@@ -101,7 +102,13 @@ message CompleteTalkRequest {
 }
 
 message CompleteTalkResponse {
+}
 
+message ListTalksRequest {
+}
+
+message ListTalksResponse {
+  repeated Talk talk = 1;
 }
 
 service ApiService {
@@ -156,6 +163,12 @@ service ApiService {
     option (google.api.http) = {
       post: "/v1/talk/complete"
       body: "*"
+    };
+  }
+
+  rpc ListTalks (ListTalksRequest) returns (ListTalksResponse) {
+    option (google.api.http) = {
+      get: "/v1/talk"
     };
   }
 }

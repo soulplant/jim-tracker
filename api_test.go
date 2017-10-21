@@ -215,6 +215,39 @@ func TestRootData(t *testing.T) {
 	}
 }
 
+func TestTalkHistory(t *testing.T) {
+	s := MakeNewTestService(t)
+	defer s.Close()
+	jamesId := addUser(t, s, "james")
+	ctx := context.Background()
+	_, err := s.UpdateUser(ctx, &api.UpdateUserRequest{
+		UserId:      jamesId,
+		HasNextTalk: true,
+		NextTalk:    "next talk",
+	})
+	if err != nil {
+		t.Fatalf("Failed to update user: %v", err)
+	}
+	_, err = s.CompleteTalk(ctx, &api.CompleteTalkRequest{
+		UserId: jamesId,
+	})
+	if err != nil {
+		t.Fatalf("Failed to complete talk: %v", err)
+	}
+	resp, err := s.ListTalks(ctx, &api.ListTalksRequest{})
+	if err != nil {
+		t.Fatalf("Failed to list talks: %v", err)
+	}
+	if len(resp.Talk) != 1 {
+		t.Fatalf("Expected 1 talk in history, got %d", len(resp.Talk))
+	}
+
+	if resp.Talk[0].Name != "next talk" {
+		t.Errorf("Expected talk name to be 'next talk', not '%s'", resp.Talk[0].Name)
+	}
+	// TODO(james): Test that the talks are returned in the correct order.
+}
+
 type UserAdder interface {
 	AddUser(context.Context, *api.AddUserRequest) (*api.AddUserResponse, error)
 }

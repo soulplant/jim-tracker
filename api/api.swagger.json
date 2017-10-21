@@ -59,6 +59,20 @@
       }
     },
     "/v1/talk": {
+      "get": {
+        "operationId": "ListTalks",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiListTalksResponse"
+            }
+          }
+        },
+        "tags": [
+          "ApiService"
+        ]
+      },
       "post": {
         "operationId": "AddTalk",
         "responses": {
@@ -294,6 +308,17 @@
         }
       }
     },
+    "apiListTalksResponse": {
+      "type": "object",
+      "properties": {
+        "talk": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/apiTalk"
+          }
+        }
+      }
+    },
     "apiRemoveUserResponse": {
       "type": "object"
     },
@@ -354,9 +379,10 @@
             "type": "string"
           }
         },
-        "completed": {
+        "completedSeconds": {
           "type": "string",
-          "format": "date-time"
+          "format": "int64",
+          "description": "Timestamp for when this task was completed in seconds from the epoch."
         }
       }
     },

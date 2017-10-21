@@ -2,9 +2,11 @@ package main
 
 import (
 	"fmt"
+	"time"
+
+	"google.golang.org/api/iterator"
 
 	"cloud.google.com/go/datastore"
-	"github.com/golang/protobuf/ptypes"
 	"github.com/soulplant/talk-tracker/api"
 	context "golang.org/x/net/context"
 )
@@ -13,6 +15,14 @@ import (
 type dsApiService struct {
 	key    *datastore.Key
 	client *datastore.Client
+}
+
+func userKey(id int64) *datastore.Key {
+	return datastore.IDKey("user", id, nil)
+}
+
+func talkKey(id string) *datastore.Key {
+	return datastore.NameKey("talk", id, nil)
 }
 
 // NewDsApiService constructs an api service that is backed by the given.
@@ -114,9 +124,9 @@ func (s *dsApiService) AddUser(ctx context.Context, req *api.AddUserRequest) (*a
 
 func (s *dsApiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api.AddTalkResponse, error) {
 	key, err := s.client.Put(ctx, talkKey(""), &api.Talk{
-		SpeakerId: req.UserId,
-		Name:      req.Name,
-		Completed: ptypes.TimestampNow(),
+		SpeakerId:        req.UserId,
+		Name:             req.Name,
+		CompletedSeconds: time.Now().Unix(),
 	})
 	if err != nil {
 		return nil, err
@@ -278,6 +288,23 @@ func (s *dsApiService) CompleteTalk(ctx context.Context, req *api.CompleteTalkRe
 		if _, err := tx.Put(s.key, &data); err != nil {
 			return err
 		}
+		var user api.User
+		err := tx.Get(userKey(req.GetUserId()), &user)
+		if err != nil {
+			return err
+		}
+
+		talk := api.Talk{
+			SpeakerId:        req.GetUserId(),
+			CompletedSeconds: time.Now().Unix(),
+			Done:             true,
+			Name:             user.NextTalk,
+		}
+		_, err = tx.Put(talkKey(""), &talk)
+		if err != nil {
+			return err
+		}
+
 		return s.updateUser(ctx, tx, &api.UpdateUserRequest{
 			UserId:      req.GetUserId(),
 			HasNextTalk: true,
@@ -288,4 +315,24 @@ func (s *dsApiService) CompleteTalk(ctx context.Context, req *api.CompleteTalkRe
 		return nil, err
 	}
 	return &api.CompleteTalkResponse{}, nil
+}
+
+func (s *dsApiService) ListTalks(ctx context.Context, req *api.ListTalksRequest) (*api.ListTalksResponse, error) {
+	it := s.client.Run(ctx, datastore.NewQuery("talk").Order("-CompletedSeconds"))
+	talks := []*api.Talk{}
+	for {
+		var talk api.Talk
+		key, err := it.Next(&talk)
+		if err == iterator.Done {
+			break
+		}
+		if err != nil {
+			return nil, err
+		}
+		talk.Id = key.ID
+		talks = append(talks, &talk)
+	}
+	return &api.ListTalksResponse{
+		Talk: talks,
+	}, nil
 }
