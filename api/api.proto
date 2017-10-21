@@ -3,25 +3,27 @@ syntax = "proto3";
 package api;
 
 import "google/api/annotations.proto";
+import "google/protobuf/Timestamp.proto";
 
 message ServerState {
     repeated User user = 1;
     repeated Talk talk = 2;
-    int32 nextId = 3;
+    int64 nextId = 3;
 }
 
 message User {
-  string id = 1;
+  int64 id = 1;
   string name = 2;
   string nextTalk = 3;
 }
 
 message Talk {
-  string id = 1;
+  int64 id = 1;
   string name = 2;
-  string speakerId = 3;
+  int64 speakerId = 3;
   bool done = 4;
   repeated string url = 5;
+  google.protobuf.Timestamp completed = 6;
 }
 
 message FetchAllRequest {
@@ -39,21 +41,22 @@ message AddUserRequest {
 
 message AddUserResponse {
   // The newly added user.
-  User user = 1;
+  int64 userId = 1;
 }
 
 message AddTalkRequest {
-  string userId = 1;
+  int64 userId = 1;
+  string name = 2;
 }
 
 message AddTalkResponse {
-  Talk talk = 1;
+  int64 talkId = 1;
 }
 
 message ReorderRequest {
   int64 version = 1;
-  string moveUserId = 2;
-  string anchorUserId = 3;
+  int64 moveUserId = 2;
+  int64 anchorUserId = 3;
   bool before = 4;
 }
 
@@ -71,23 +74,25 @@ message GetUsersResponse {
 }
 
 message UpdateUserRequest {
-  string userId = 1;
+  int64 userId = 1;
   string name = 2;
-  string nextTalk = 3;
+  bool hasName = 3;
+  string nextTalk = 4;
+  bool hasNextTalk = 5;
 }
 
 message UpdateUserResponse {
 }
 
 message RemoveUserRequest {
-  string userId = 1;
+  int64 userId = 1;
 }
 
 message RemoveUserResponse {
 }
 
 message CompleteTalkRequest {
-  string userId = 1;
+  int64 userId = 1;
 }
 
 message CompleteTalkResponse {

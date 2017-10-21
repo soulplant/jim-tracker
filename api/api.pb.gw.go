@@ -79,7 +79,7 @@ func request_ApiService_UpdateUser_0(ctx context.Context, marshaler runtime.Mars
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
 
-	protoReq.UserId, err = runtime.String(val)
+	protoReq.UserId, err = runtime.Int64(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)
@@ -106,7 +106,7 @@ func request_ApiService_RemoveUser_0(ctx context.Context, marshaler runtime.Mars
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "missing parameter %s", "userId")
 	}
 
-	protoReq.UserId, err = runtime.String(val)
+	protoReq.UserId, err = runtime.Int64(val)
 
 	if err != nil {
 		return nil, metadata, status.Errorf(codes.InvalidArgument, "type mismatch, parameter: %s, error: %v", "userId", err)

@@ -10,133 +10,12 @@ import (
 	context "golang.org/x/net/context"
 )
 
-// An apiService backed by datastore
-type dsApiService struct {
-	key    *datastore.Key
-	client *datastore.Client
+func userKey(id int64) *datastore.Key {
+	return datastore.IDKey("user", id, nil)
 }
 
-// TODO(james): Replace this with an interceptor that deserialises/serialises before/after the RPC.
-func NewDsApiService(client *datastore.Client, key *datastore.Key) *dsApiService {
-	return &dsApiService{key, client}
-}
-
-func (s *dsApiService) getData() (*apiService, error) {
-	var data apiService
-	err := s.client.Get(context.Background(), s.key, &data)
-	return &data, err
-}
-
-func (s *dsApiService) FetchAll(ctx context.Context, req *api.FetchAllRequest) (*api.FetchAllResponse, error) {
-	api, err := s.getData()
-	if err != nil {
-		return nil, err
-	}
-	return api.FetchAll(ctx, req)
-}
-
-func (s *dsApiService) GetUsers(ctx context.Context, req *api.GetUsersRequest) (*api.GetUsersResponse, error) {
-	api, err := s.getData()
-	if err != nil {
-		return nil, err
-	}
-	return api.GetUsers(ctx, req)
-}
-
-func (s *dsApiService) AddUser(ctx context.Context, req *api.AddUserRequest) (*api.AddUserResponse, error) {
-	api, err := s.getData()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := api.AddUser(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	_, err = s.client.Put(ctx, s.key, api)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (s *dsApiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api.AddTalkResponse, error) {
-	api, err := s.getData()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := api.AddTalk(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	_, err = s.client.Put(ctx, s.key, api)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (s *dsApiService) Reorder(ctx context.Context, req *api.ReorderRequest) (*api.ReorderResponse, error) {
-	api, err := s.getData()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := api.Reorder(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	_, err = s.client.Put(ctx, s.key, api)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (s *dsApiService) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (*api.UpdateUserResponse, error) {
-	api, err := s.getData()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := api.UpdateUser(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	_, err = s.client.Put(ctx, s.key, api)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (s *dsApiService) RemoveUser(ctx context.Context, req *api.RemoveUserRequest) (*api.RemoveUserResponse, error) {
-	api, err := s.getData()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := api.RemoveUser(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	_, err = s.client.Put(ctx, s.key, api)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
-}
-
-func (s *dsApiService) CompleteTalk(ctx context.Context, req *api.CompleteTalkRequest) (*api.CompleteTalkResponse, error) {
-	api, err := s.getData()
-	if err != nil {
-		return nil, err
-	}
-	resp, err := api.CompleteTalk(ctx, req)
-	if err != nil {
-		return nil, err
-	}
-	_, err = s.client.Put(ctx, s.key, api)
-	if err != nil {
-		return nil, err
-	}
-	return resp, nil
+func talkKey(id string) *datastore.Key {
+	return datastore.NameKey("talk", id, nil)
 }
 
 type apiService api.ServerState
@@ -159,7 +38,7 @@ func (s *apiService) FetchAll(context.Context, *api.FetchAllRequest) (*api.Fetch
 
 func (s *apiService) AddUser(ctx context.Context, req *api.AddUserRequest) (*api.AddUserResponse, error) {
 	user := &api.User{
-		Id:   fmt.Sprintf("%d", s.NextId),
+		Id:   s.NextId,
 		Name: req.GetName(),
 	}
 	s.NextId += 1
@@ -167,12 +46,12 @@ func (s *apiService) AddUser(ctx context.Context, req *api.AddUserRequest) (*api
 	s.User = append(s.User, user)
 
 	return &api.AddUserResponse{
-		User: user,
+		UserId: user.Id,
 	}, nil
 }
 
 func (s *apiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api.AddTalkResponse, error) {
-	if len(req.GetUserId()) == 0 {
+	if req.GetUserId() == 0 {
 		return nil, errors.New("user_id required")
 	}
 	talk := &api.Talk{
@@ -181,7 +60,7 @@ func (s *apiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api
 	}
 	s.Talk = append(s.Talk, talk)
 	return &api.AddTalkResponse{
-		Talk: talk,
+		TalkId: talk.Id,
 	}, nil
 }
 
@@ -255,13 +134,13 @@ func (s *apiService) CompleteTalk(ctx context.Context, req *api.CompleteTalkRequ
 	return &api.CompleteTalkResponse{}, nil
 }
 
-func (s *apiService) indexOfUser(userId string) (int, error) {
+func (s *apiService) indexOfUser(userId int64) (int, error) {
 	for i, u := range s.User {
 		if u.GetId() == userId {
 			return i, nil
 		}
 	}
-	return 0, fmt.Errorf("Failed to get index of User %s", userId)
+	return 0, fmt.Errorf("Failed to get index of User %d", userId)
 }
 
 func (s *apiService) GetUsers(ctx context.Context, req *api.GetUsersRequest) (*api.GetUsersResponse, error) {
@@ -270,8 +149,8 @@ func (s *apiService) GetUsers(ctx context.Context, req *api.GetUsersRequest) (*a
 	}, nil
 }
 
-func (s *apiService) allocateId() string {
+func (s *apiService) allocateId() int64 {
 	result := s.NextId
 	s.NextId += 1
-	return fmt.Sprintf("%d", result)
+	return result
 }

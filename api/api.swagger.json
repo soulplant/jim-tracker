@@ -166,7 +166,8 @@
             "name": "userId",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "int64"
           }
         ],
         "tags": [
@@ -188,7 +189,8 @@
             "name": "userId",
             "in": "path",
             "required": true,
-            "type": "string"
+            "type": "string",
+            "format": "int64"
           },
           {
             "name": "body",
@@ -210,6 +212,10 @@
       "type": "object",
       "properties": {
         "userId": {
+          "type": "string",
+          "format": "int64"
+        },
+        "name": {
           "type": "string"
         }
       }
@@ -217,8 +223,9 @@
     "apiAddTalkResponse": {
       "type": "object",
       "properties": {
-        "talk": {
-          "$ref": "#/definitions/apiTalk"
+        "talkId": {
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -233,8 +240,9 @@
     "apiAddUserResponse": {
       "type": "object",
       "properties": {
-        "user": {
-          "$ref": "#/definitions/apiUser",
+        "userId": {
+          "type": "string",
+          "format": "int64",
           "description": "The newly added user."
         }
       }
@@ -243,7 +251,8 @@
       "type": "object",
       "properties": {
         "userId": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         }
       }
     },
@@ -296,10 +305,12 @@
           "format": "int64"
         },
         "moveUserId": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         },
         "anchorUserId": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         },
         "before": {
           "type": "boolean",
@@ -323,13 +334,15 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         },
         "name": {
           "type": "string"
         },
         "speakerId": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         },
         "done": {
           "type": "boolean",
@@ -340,6 +353,10 @@
           "items": {
             "type": "string"
           }
+        },
+        "completed": {
+          "type": "string",
+          "format": "date-time"
         }
       }
     },
@@ -347,13 +364,22 @@
       "type": "object",
       "properties": {
         "userId": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         },
         "name": {
           "type": "string"
         },
+        "hasName": {
+          "type": "boolean",
+          "format": "boolean"
+        },
         "nextTalk": {
           "type": "string"
+        },
+        "hasNextTalk": {
+          "type": "boolean",
+          "format": "boolean"
         }
       }
     },
@@ -364,7 +390,8 @@
       "type": "object",
       "properties": {
         "id": {
-          "type": "string"
+          "type": "string",
+          "format": "int64"
         },
         "name": {
           "type": "string"
