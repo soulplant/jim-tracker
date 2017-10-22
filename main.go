@@ -22,6 +22,7 @@ const port = ":1234"
 const grpcPort = "127.0.0.1:1235"
 
 var projectId = flag.String("projectId", "dev", "The GCP project to connect to")
+var fileDir = flag.String("fileDir", "/files", "The path to serve static assets from")
 var basicAuthUser = os.Getenv("BASIC_AUTH_USER")
 var basicAuthPass = os.Getenv("BASIC_AUTH_PASS")
 
@@ -29,7 +30,7 @@ var basicAuthPass = os.Getenv("BASIC_AUTH_PASS")
 
 func filesHandler(w http.ResponseWriter, r *http.Request) {
 	// w.Header().Add("Access-Control-Allow-Origin", "*")
-	http.StripPrefix("/files/", http.FileServer(http.Dir("."))).ServeHTTP(w, r)
+	http.FileServer(http.Dir(*fileDir)).ServeHTTP(w, r)
 }
 
 // authCheck returns true if the request has a valid authentication header.
@@ -58,13 +59,14 @@ func RequireAuth(handler http.Handler) http.HandlerFunc {
 }
 
 func main() {
+	flag.Parse()
 	apiMux := runtime.NewServeMux()
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	api.RegisterApiServiceHandlerFromEndpoint(ctx, apiMux, grpcPort, []grpc.DialOption{grpc.WithInsecure()})
 	http.Handle("/api/", RequireAuth(http.StripPrefix("/api", apiMux)))
-	http.Handle("/files/", RequireAuth(http.HandlerFunc(filesHandler)))
+	http.Handle("/", RequireAuth(http.HandlerFunc(filesHandler)))
 
 	go func() {
 		lis, err := net.Listen("tcp", grpcPort)
