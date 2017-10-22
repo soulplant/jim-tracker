@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"cloud.google.com/go/datastore"
 
@@ -22,8 +23,40 @@ const port = ":1234"
 const grpcPort = "127.0.0.1:1235"
 
 var projectId = flag.String("projectId", "dev", "The GCP project to connect to")
+var basicAuthUser = os.Getenv("BASIC_AUTH_USER")
+var basicAuthPass = os.Getenv("BASIC_AUTH_PASS")
 
 //go:generate ./gen-protos.sh
+
+func filesHandler(w http.ResponseWriter, r *http.Request) {
+	// w.Header().Add("Access-Control-Allow-Origin", "*")
+	http.StripPrefix("/files/", http.FileServer(http.Dir("."))).ServeHTTP(w, r)
+}
+
+// authCheck returns true if the request has a valid authentication header.
+func authCheck(r *http.Request) bool {
+	// If the environment variables aren't set, then don't do the auth check.
+	if basicAuthUser == "" {
+		return true
+	}
+	user, pass, ok := r.BasicAuth()
+	if !ok {
+		return false
+	}
+	return user == basicAuthUser && pass == basicAuthPass
+}
+
+func RequireAuth(handler http.Handler) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		if !authCheck(r) {
+			w.Header().Set("WWW-Authenticate", `Basic realm="Helix Talks"`)
+			w.WriteHeader(401)
+			w.Write([]byte("401 Unauthorized\n"))
+			return
+		}
+		handler.ServeHTTP(w, r)
+	}
+}
 
 func main() {
 	apiMux := runtime.NewServeMux()
@@ -31,11 +64,8 @@ func main() {
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()
 	api.RegisterApiServiceHandlerFromEndpoint(ctx, apiMux, grpcPort, []grpc.DialOption{grpc.WithInsecure()})
-	http.Handle("/api/", http.StripPrefix("/api", apiMux))
-	http.HandleFunc("/files/", func(w http.ResponseWriter, r *http.Request) {
-		// w.Header().Add("Access-Control-Allow-Origin", "*")
-		http.StripPrefix("/files/", http.FileServer(http.Dir("."))).ServeHTTP(w, r)
-	})
+	http.Handle("/api/", RequireAuth(http.StripPrefix("/api", apiMux)))
+	http.Handle("/files/", RequireAuth(http.HandlerFunc(filesHandler)))
 
 	go func() {
 		lis, err := net.Listen("tcp", grpcPort)
