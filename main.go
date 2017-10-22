@@ -13,7 +13,6 @@ import (
 	"net"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	_ "github.com/jinzhu/gorm/dialects/sqlite"
 	"github.com/soulplant/talk-tracker/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
