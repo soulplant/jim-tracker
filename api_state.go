@@ -18,16 +18,21 @@ type dsApiService struct {
 }
 
 func userKey(id int64) *datastore.Key {
-	return datastore.IDKey("user", id, nil)
+	key := datastore.IDKey("user", id, nil)
+	key.Namespace = *namespace
+	return key
 }
 
-func talkKey(id string) *datastore.Key {
-	return datastore.NameKey("talk", id, nil)
+func talkKey(id int64) *datastore.Key {
+	key := datastore.IDKey("talk", id, nil)
+	key.Namespace = *namespace
+	return key
 }
 
 // NewDsApiService constructs an api service that is backed by the given.
 func NewDsApiService(client *datastore.Client) *dsApiService {
 	key := datastore.NameKey("order", "order", nil)
+	key.Namespace = *namespace
 	return &dsApiService{key, client}
 }
 
@@ -43,10 +48,12 @@ func (s *dsApiService) Init() error {
 		var root rootData
 		err := tx.Get(s.key, &root)
 		if err == nil {
+			fmt.Println("Found root data, skipping initialisation")
 			return nil
 		}
 
 		if err == datastore.ErrNoSuchEntity {
+			fmt.Println("Can't find the root data, so creating it")
 			root = rootData{Order: []int64{}}
 			_, err := s.client.Put(context.Background(), s.key, &root)
 			return err
@@ -123,7 +130,7 @@ func (s *dsApiService) AddUser(ctx context.Context, req *api.AddUserRequest) (*a
 }
 
 func (s *dsApiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api.AddTalkResponse, error) {
-	key, err := s.client.Put(ctx, talkKey(""), &api.Talk{
+	key, err := s.client.Put(ctx, talkKey(0), &api.Talk{
 		SpeakerId:        req.UserId,
 		Name:             req.Name,
 		CompletedSeconds: time.Now().Unix(),
@@ -225,11 +232,17 @@ func (s *dsApiService) updateUser(ctx context.Context, tx *datastore.Transaction
 	if err != nil {
 		return err
 	}
+	empty := true
 	if req.GetHasName() {
 		user.Name = req.GetName()
+		empty = false
 	}
 	if req.GetHasNextTalk() {
 		user.NextTalk = req.GetNextTalk()
+		empty = false
+	}
+	if empty {
+		return fmt.Errorf("UpdateUser request requests no changes, have you set the Has* fields?")
 	}
 	_, err = tx.Put(key, &user)
 	return err
@@ -300,7 +313,7 @@ func (s *dsApiService) CompleteTalk(ctx context.Context, req *api.CompleteTalkRe
 			Done:             true,
 			Name:             user.NextTalk,
 		}
-		_, err = tx.Put(talkKey(""), &talk)
+		_, err = tx.Put(talkKey(0), &talk)
 		if err != nil {
 			return err
 		}
@@ -318,7 +331,7 @@ func (s *dsApiService) CompleteTalk(ctx context.Context, req *api.CompleteTalkRe
 }
 
 func (s *dsApiService) ListTalks(ctx context.Context, req *api.ListTalksRequest) (*api.ListTalksResponse, error) {
-	it := s.client.Run(ctx, datastore.NewQuery("talk").Order("-CompletedSeconds"))
+	it := s.client.Run(ctx, datastore.NewQuery("talk").Order("-CompletedSeconds").Namespace(*namespace))
 	talks := []*api.Talk{}
 	for {
 		var talk api.Talk

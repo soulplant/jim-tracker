@@ -23,6 +23,7 @@ const grpcPort = "127.0.0.1:1235"
 
 var projectId = flag.String("projectId", "dev", "The GCP project to connect to")
 var fileDir = flag.String("fileDir", "/files", "The path to serve static assets from")
+var namespace = flag.String("namespace", "talk-tracker", "The namespace to store all entities in datastore in")
 var basicAuthUser = os.Getenv("BASIC_AUTH_USER")
 var basicAuthPass = os.Getenv("BASIC_AUTH_PASS")
 
@@ -60,6 +61,7 @@ func RequireAuth(handler http.Handler) http.HandlerFunc {
 
 func main() {
 	flag.Parse()
+	fmt.Printf("Using namespace '%s'\n", *namespace)
 	apiMux := runtime.NewServeMux()
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
