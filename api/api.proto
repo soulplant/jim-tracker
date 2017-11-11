@@ -43,7 +43,8 @@ service ApiService {
 
   rpc RecordDelivery (RecordDeliveryRequest) returns (RecordDeliveryResponse) {
     option (google.api.http) = {
-      get: "/v1/record"
+      post: "/v1/record"
+      body: "*"
     };
   }
 }

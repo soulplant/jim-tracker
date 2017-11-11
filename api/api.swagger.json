@@ -32,7 +32,7 @@
       }
     },
     "/v1/record": {
-      "get": {
+      "post": {
         "operationId": "RecordDelivery",
         "responses": {
           "200": {
@@ -44,32 +44,12 @@
         },
         "parameters": [
           {
-            "name": "delivery.date",
-            "description": "The date this delivery is for in YYYYMMDD.",
-            "in": "query",
-            "required": false,
-            "type": "string"
-          },
-          {
-            "name": "delivery.time.hour",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "delivery.time.minute",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
-          },
-          {
-            "name": "delivery.time.second",
-            "in": "query",
-            "required": false,
-            "type": "integer",
-            "format": "int32"
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiRecordDeliveryRequest"
+            }
           }
         ],
         "tags": [
@@ -117,6 +97,14 @@
         "second": {
           "type": "integer",
           "format": "int32"
+        }
+      }
+    },
+    "apiRecordDeliveryRequest": {
+      "type": "object",
+      "properties": {
+        "delivery": {
+          "$ref": "#/definitions/apiDelivery"
         }
       }
     },
