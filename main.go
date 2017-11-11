@@ -13,7 +13,7 @@ import (
 	"net"
 
 	"github.com/grpc-ecosystem/grpc-gateway/runtime"
-	"github.com/soulplant/talk-tracker/api"
+	"github.com/soulplant/jim-tracker/api"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
@@ -23,7 +23,7 @@ const grpcPort = "127.0.0.1:1235"
 
 var projectId = flag.String("projectId", "dev", "The GCP project to connect to")
 var fileDir = flag.String("fileDir", "/files", "The path to serve static assets from")
-var namespace = flag.String("namespace", "talk-tracker", "The namespace to store all entities in datastore in")
+var namespace = flag.String("namespace", "jim-tracker", "The namespace to store all entities in datastore in")
 var basicAuthUser = os.Getenv("BASIC_AUTH_USER")
 var basicAuthPass = os.Getenv("BASIC_AUTH_PASS")
 
@@ -50,7 +50,7 @@ func authCheck(r *http.Request) bool {
 func RequireAuth(handler http.Handler) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		if !authCheck(r) {
-			w.Header().Set("WWW-Authenticate", `Basic realm="Helix Talks"`)
+			w.Header().Set("WWW-Authenticate", `Basic realm="Helix Jim Tracker"`)
 			w.WriteHeader(401)
 			w.Write([]byte("401 Unauthorized\n"))
 			return
@@ -83,10 +83,6 @@ func main() {
 			log.Fatalf("Couldn't create datastore client %v", err)
 		}
 		service := NewDsApiService(client)
-		if err = service.Init(); err != nil {
-			log.Fatalf("Couldn't init datastore %s", err)
-		}
-		service.FetchAll(context.Background(), &api.FetchAllRequest{})
 		api.RegisterApiServiceServer(rpcServer, service)
 		fmt.Printf("Listening for gRPC on %s\n", grpcPort)
 		log.Fatal(rpcServer.Serve(lis))
@@ -98,29 +94,3 @@ func main() {
 		fmt.Println("Failed to listen", err)
 	}
 }
-
-// func OpenTestDb() *gorm.DB {
-// 	os.Remove("test.db")
-// 	db, err := gorm.Open("sqlite3", "test.db")
-// 	if err != nil {
-// 		panic("failed to connect database")
-// 	}
-// 	// Migrate the schema
-// 	db.AutoMigrate(&Project{}, &User{}, &Task{}, &Stretch{}, &Category{})
-// 	return db
-// }
-
-// func test(db *gorm.DB) {
-// 	// Read
-// 	var project Project
-// 	if e := db.First(&project, 1000); e.Error != nil {
-// 		fmt.Println("Couldn't find 1000")
-// 	}
-// 	if e := db.First(&project, 1); e.Error != nil {
-// 		fmt.Println("Couldn't find 1")
-// 	}
-// 	db.First(&project, "Name = ?", "Dreamer")
-
-// 	// Delete - delete project
-// 	// db.Delete(&project)
-// }

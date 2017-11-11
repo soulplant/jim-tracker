@@ -8,28 +8,11 @@ It is generated from these files:
 	api.proto
 
 It has these top-level messages:
-	ServerState
-	RootData
-	User
-	Talk
+	Delivery
 	FetchAllRequest
 	FetchAllResponse
-	AddUserRequest
-	AddUserResponse
-	AddTalkRequest
-	AddTalkResponse
-	ReorderRequest
-	ReorderResponse
-	GetUsersRequest
-	GetUsersResponse
-	UpdateUserRequest
-	UpdateUserResponse
-	RemoveUserRequest
-	RemoveUserResponse
-	CompleteTalkRequest
-	CompleteTalkResponse
-	ListTalksRequest
-	ListTalksResponse
+	RecordDeliveryRequest
+	RecordDeliveryResponse
 */
 package api
 
@@ -54,140 +37,28 @@ var _ = math.Inf
 // proto package needs to be updated.
 const _ = proto.ProtoPackageIsVersion2 // please upgrade the proto package
 
-type ServerState struct {
-	User   []*User `protobuf:"bytes,1,rep,name=user" json:"user,omitempty"`
-	Talk   []*Talk `protobuf:"bytes,2,rep,name=talk" json:"talk,omitempty"`
-	NextId int64   `protobuf:"varint,3,opt,name=nextId" json:"nextId,omitempty"`
+type Delivery struct {
+	// The date this delivery is for in YYYYMMDD.
+	Date string `protobuf:"bytes,1,opt,name=date" json:"date,omitempty"`
+	// The timestamp of the delivery.
+	Time int64 `protobuf:"varint,2,opt,name=time" json:"time,omitempty"`
 }
 
-func (m *ServerState) Reset()                    { *m = ServerState{} }
-func (m *ServerState) String() string            { return proto.CompactTextString(m) }
-func (*ServerState) ProtoMessage()               {}
-func (*ServerState) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
+func (m *Delivery) Reset()                    { *m = Delivery{} }
+func (m *Delivery) String() string            { return proto.CompactTextString(m) }
+func (*Delivery) ProtoMessage()               {}
+func (*Delivery) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{0} }
 
-func (m *ServerState) GetUser() []*User {
+func (m *Delivery) GetDate() string {
 	if m != nil {
-		return m.User
-	}
-	return nil
-}
-
-func (m *ServerState) GetTalk() []*Talk {
-	if m != nil {
-		return m.Talk
-	}
-	return nil
-}
-
-func (m *ServerState) GetNextId() int64 {
-	if m != nil {
-		return m.NextId
-	}
-	return 0
-}
-
-type RootData struct {
-	// The ids of users in the order that they are scheduled to give a talk.
-	Order []int64 `protobuf:"varint,1,rep,packed,name=order" json:"order,omitempty"`
-}
-
-func (m *RootData) Reset()                    { *m = RootData{} }
-func (m *RootData) String() string            { return proto.CompactTextString(m) }
-func (*RootData) ProtoMessage()               {}
-func (*RootData) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
-
-func (m *RootData) GetOrder() []int64 {
-	if m != nil {
-		return m.Order
-	}
-	return nil
-}
-
-type User struct {
-	Id       int64  `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
-	Name     string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
-	NextTalk string `protobuf:"bytes,3,opt,name=nextTalk" json:"nextTalk,omitempty"`
-}
-
-func (m *User) Reset()                    { *m = User{} }
-func (m *User) String() string            { return proto.CompactTextString(m) }
-func (*User) ProtoMessage()               {}
-func (*User) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
-
-func (m *User) GetId() int64 {
-	if m != nil {
-		return m.Id
-	}
-	return 0
-}
-
-func (m *User) GetName() string {
-	if m != nil {
-		return m.Name
+		return m.Date
 	}
 	return ""
 }
 
-func (m *User) GetNextTalk() string {
+func (m *Delivery) GetTime() int64 {
 	if m != nil {
-		return m.NextTalk
-	}
-	return ""
-}
-
-type Talk struct {
-	Id        int64    `protobuf:"varint,1,opt,name=id" json:"id,omitempty"`
-	Name      string   `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
-	SpeakerId int64    `protobuf:"varint,3,opt,name=speakerId" json:"speakerId,omitempty"`
-	Done      bool     `protobuf:"varint,4,opt,name=done" json:"done,omitempty"`
-	Url       []string `protobuf:"bytes,5,rep,name=url" json:"url,omitempty"`
-	// Timestamp for when this task was completed in seconds from the epoch.
-	CompletedSeconds int64 `protobuf:"varint,6,opt,name=completedSeconds" json:"completedSeconds,omitempty"`
-}
-
-func (m *Talk) Reset()                    { *m = Talk{} }
-func (m *Talk) String() string            { return proto.CompactTextString(m) }
-func (*Talk) ProtoMessage()               {}
-func (*Talk) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
-
-func (m *Talk) GetId() int64 {
-	if m != nil {
-		return m.Id
-	}
-	return 0
-}
-
-func (m *Talk) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *Talk) GetSpeakerId() int64 {
-	if m != nil {
-		return m.SpeakerId
-	}
-	return 0
-}
-
-func (m *Talk) GetDone() bool {
-	if m != nil {
-		return m.Done
-	}
-	return false
-}
-
-func (m *Talk) GetUrl() []string {
-	if m != nil {
-		return m.Url
-	}
-	return nil
-}
-
-func (m *Talk) GetCompletedSeconds() int64 {
-	if m != nil {
-		return m.CompletedSeconds
+		return m.Time
 	}
 	return 0
 }
@@ -198,360 +69,54 @@ type FetchAllRequest struct {
 func (m *FetchAllRequest) Reset()                    { *m = FetchAllRequest{} }
 func (m *FetchAllRequest) String() string            { return proto.CompactTextString(m) }
 func (*FetchAllRequest) ProtoMessage()               {}
-func (*FetchAllRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
+func (*FetchAllRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{1} }
 
 type FetchAllResponse struct {
-	Version string  `protobuf:"bytes,1,opt,name=version" json:"version,omitempty"`
-	User    []*User `protobuf:"bytes,2,rep,name=user" json:"user,omitempty"`
-	Talk    []*Talk `protobuf:"bytes,3,rep,name=talk" json:"talk,omitempty"`
+	Delivery []*Delivery `protobuf:"bytes,1,rep,name=delivery" json:"delivery,omitempty"`
 }
 
 func (m *FetchAllResponse) Reset()                    { *m = FetchAllResponse{} }
 func (m *FetchAllResponse) String() string            { return proto.CompactTextString(m) }
 func (*FetchAllResponse) ProtoMessage()               {}
-func (*FetchAllResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{5} }
+func (*FetchAllResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{2} }
 
-func (m *FetchAllResponse) GetVersion() string {
+func (m *FetchAllResponse) GetDelivery() []*Delivery {
 	if m != nil {
-		return m.Version
-	}
-	return ""
-}
-
-func (m *FetchAllResponse) GetUser() []*User {
-	if m != nil {
-		return m.User
+		return m.Delivery
 	}
 	return nil
 }
 
-func (m *FetchAllResponse) GetTalk() []*Talk {
+type RecordDeliveryRequest struct {
+	Date int64 `protobuf:"varint,1,opt,name=date" json:"date,omitempty"`
+}
+
+func (m *RecordDeliveryRequest) Reset()                    { *m = RecordDeliveryRequest{} }
+func (m *RecordDeliveryRequest) String() string            { return proto.CompactTextString(m) }
+func (*RecordDeliveryRequest) ProtoMessage()               {}
+func (*RecordDeliveryRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{3} }
+
+func (m *RecordDeliveryRequest) GetDate() int64 {
 	if m != nil {
-		return m.Talk
-	}
-	return nil
-}
-
-type AddUserRequest struct {
-	Name string `protobuf:"bytes,1,opt,name=name" json:"name,omitempty"`
-}
-
-func (m *AddUserRequest) Reset()                    { *m = AddUserRequest{} }
-func (m *AddUserRequest) String() string            { return proto.CompactTextString(m) }
-func (*AddUserRequest) ProtoMessage()               {}
-func (*AddUserRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{6} }
-
-func (m *AddUserRequest) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-type AddUserResponse struct {
-	// The newly added user.
-	UserId int64 `protobuf:"varint,1,opt,name=userId" json:"userId,omitempty"`
-}
-
-func (m *AddUserResponse) Reset()                    { *m = AddUserResponse{} }
-func (m *AddUserResponse) String() string            { return proto.CompactTextString(m) }
-func (*AddUserResponse) ProtoMessage()               {}
-func (*AddUserResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{7} }
-
-func (m *AddUserResponse) GetUserId() int64 {
-	if m != nil {
-		return m.UserId
+		return m.Date
 	}
 	return 0
 }
 
-type AddTalkRequest struct {
-	UserId int64  `protobuf:"varint,1,opt,name=userId" json:"userId,omitempty"`
-	Name   string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
+type RecordDeliveryResponse struct {
 }
 
-func (m *AddTalkRequest) Reset()                    { *m = AddTalkRequest{} }
-func (m *AddTalkRequest) String() string            { return proto.CompactTextString(m) }
-func (*AddTalkRequest) ProtoMessage()               {}
-func (*AddTalkRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{8} }
-
-func (m *AddTalkRequest) GetUserId() int64 {
-	if m != nil {
-		return m.UserId
-	}
-	return 0
-}
-
-func (m *AddTalkRequest) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-type AddTalkResponse struct {
-	TalkId int64 `protobuf:"varint,1,opt,name=talkId" json:"talkId,omitempty"`
-}
-
-func (m *AddTalkResponse) Reset()                    { *m = AddTalkResponse{} }
-func (m *AddTalkResponse) String() string            { return proto.CompactTextString(m) }
-func (*AddTalkResponse) ProtoMessage()               {}
-func (*AddTalkResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{9} }
-
-func (m *AddTalkResponse) GetTalkId() int64 {
-	if m != nil {
-		return m.TalkId
-	}
-	return 0
-}
-
-type ReorderRequest struct {
-	Version      int64 `protobuf:"varint,1,opt,name=version" json:"version,omitempty"`
-	MoveUserId   int64 `protobuf:"varint,2,opt,name=moveUserId" json:"moveUserId,omitempty"`
-	AnchorUserId int64 `protobuf:"varint,3,opt,name=anchorUserId" json:"anchorUserId,omitempty"`
-	Before       bool  `protobuf:"varint,4,opt,name=before" json:"before,omitempty"`
-}
-
-func (m *ReorderRequest) Reset()                    { *m = ReorderRequest{} }
-func (m *ReorderRequest) String() string            { return proto.CompactTextString(m) }
-func (*ReorderRequest) ProtoMessage()               {}
-func (*ReorderRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{10} }
-
-func (m *ReorderRequest) GetVersion() int64 {
-	if m != nil {
-		return m.Version
-	}
-	return 0
-}
-
-func (m *ReorderRequest) GetMoveUserId() int64 {
-	if m != nil {
-		return m.MoveUserId
-	}
-	return 0
-}
-
-func (m *ReorderRequest) GetAnchorUserId() int64 {
-	if m != nil {
-		return m.AnchorUserId
-	}
-	return 0
-}
-
-func (m *ReorderRequest) GetBefore() bool {
-	if m != nil {
-		return m.Before
-	}
-	return false
-}
-
-type ReorderResponse struct {
-	Accepted bool   `protobuf:"varint,1,opt,name=accepted" json:"accepted,omitempty"`
-	Version  string `protobuf:"bytes,2,opt,name=version" json:"version,omitempty"`
-}
-
-func (m *ReorderResponse) Reset()                    { *m = ReorderResponse{} }
-func (m *ReorderResponse) String() string            { return proto.CompactTextString(m) }
-func (*ReorderResponse) ProtoMessage()               {}
-func (*ReorderResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{11} }
-
-func (m *ReorderResponse) GetAccepted() bool {
-	if m != nil {
-		return m.Accepted
-	}
-	return false
-}
-
-func (m *ReorderResponse) GetVersion() string {
-	if m != nil {
-		return m.Version
-	}
-	return ""
-}
-
-type GetUsersRequest struct {
-}
-
-func (m *GetUsersRequest) Reset()                    { *m = GetUsersRequest{} }
-func (m *GetUsersRequest) String() string            { return proto.CompactTextString(m) }
-func (*GetUsersRequest) ProtoMessage()               {}
-func (*GetUsersRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{12} }
-
-type GetUsersResponse struct {
-	Version int64   `protobuf:"varint,1,opt,name=version" json:"version,omitempty"`
-	User    []*User `protobuf:"bytes,2,rep,name=user" json:"user,omitempty"`
-}
-
-func (m *GetUsersResponse) Reset()                    { *m = GetUsersResponse{} }
-func (m *GetUsersResponse) String() string            { return proto.CompactTextString(m) }
-func (*GetUsersResponse) ProtoMessage()               {}
-func (*GetUsersResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{13} }
-
-func (m *GetUsersResponse) GetVersion() int64 {
-	if m != nil {
-		return m.Version
-	}
-	return 0
-}
-
-func (m *GetUsersResponse) GetUser() []*User {
-	if m != nil {
-		return m.User
-	}
-	return nil
-}
-
-type UpdateUserRequest struct {
-	UserId      int64  `protobuf:"varint,1,opt,name=userId" json:"userId,omitempty"`
-	Name        string `protobuf:"bytes,2,opt,name=name" json:"name,omitempty"`
-	HasName     bool   `protobuf:"varint,3,opt,name=hasName" json:"hasName,omitempty"`
-	NextTalk    string `protobuf:"bytes,4,opt,name=nextTalk" json:"nextTalk,omitempty"`
-	HasNextTalk bool   `protobuf:"varint,5,opt,name=hasNextTalk" json:"hasNextTalk,omitempty"`
-}
-
-func (m *UpdateUserRequest) Reset()                    { *m = UpdateUserRequest{} }
-func (m *UpdateUserRequest) String() string            { return proto.CompactTextString(m) }
-func (*UpdateUserRequest) ProtoMessage()               {}
-func (*UpdateUserRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{14} }
-
-func (m *UpdateUserRequest) GetUserId() int64 {
-	if m != nil {
-		return m.UserId
-	}
-	return 0
-}
-
-func (m *UpdateUserRequest) GetName() string {
-	if m != nil {
-		return m.Name
-	}
-	return ""
-}
-
-func (m *UpdateUserRequest) GetHasName() bool {
-	if m != nil {
-		return m.HasName
-	}
-	return false
-}
-
-func (m *UpdateUserRequest) GetNextTalk() string {
-	if m != nil {
-		return m.NextTalk
-	}
-	return ""
-}
-
-func (m *UpdateUserRequest) GetHasNextTalk() bool {
-	if m != nil {
-		return m.HasNextTalk
-	}
-	return false
-}
-
-type UpdateUserResponse struct {
-}
-
-func (m *UpdateUserResponse) Reset()                    { *m = UpdateUserResponse{} }
-func (m *UpdateUserResponse) String() string            { return proto.CompactTextString(m) }
-func (*UpdateUserResponse) ProtoMessage()               {}
-func (*UpdateUserResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{15} }
-
-type RemoveUserRequest struct {
-	UserId int64 `protobuf:"varint,1,opt,name=userId" json:"userId,omitempty"`
-}
-
-func (m *RemoveUserRequest) Reset()                    { *m = RemoveUserRequest{} }
-func (m *RemoveUserRequest) String() string            { return proto.CompactTextString(m) }
-func (*RemoveUserRequest) ProtoMessage()               {}
-func (*RemoveUserRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{16} }
-
-func (m *RemoveUserRequest) GetUserId() int64 {
-	if m != nil {
-		return m.UserId
-	}
-	return 0
-}
-
-type RemoveUserResponse struct {
-}
-
-func (m *RemoveUserResponse) Reset()                    { *m = RemoveUserResponse{} }
-func (m *RemoveUserResponse) String() string            { return proto.CompactTextString(m) }
-func (*RemoveUserResponse) ProtoMessage()               {}
-func (*RemoveUserResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{17} }
-
-type CompleteTalkRequest struct {
-	UserId int64 `protobuf:"varint,1,opt,name=userId" json:"userId,omitempty"`
-}
-
-func (m *CompleteTalkRequest) Reset()                    { *m = CompleteTalkRequest{} }
-func (m *CompleteTalkRequest) String() string            { return proto.CompactTextString(m) }
-func (*CompleteTalkRequest) ProtoMessage()               {}
-func (*CompleteTalkRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{18} }
-
-func (m *CompleteTalkRequest) GetUserId() int64 {
-	if m != nil {
-		return m.UserId
-	}
-	return 0
-}
-
-type CompleteTalkResponse struct {
-}
-
-func (m *CompleteTalkResponse) Reset()                    { *m = CompleteTalkResponse{} }
-func (m *CompleteTalkResponse) String() string            { return proto.CompactTextString(m) }
-func (*CompleteTalkResponse) ProtoMessage()               {}
-func (*CompleteTalkResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{19} }
-
-type ListTalksRequest struct {
-}
-
-func (m *ListTalksRequest) Reset()                    { *m = ListTalksRequest{} }
-func (m *ListTalksRequest) String() string            { return proto.CompactTextString(m) }
-func (*ListTalksRequest) ProtoMessage()               {}
-func (*ListTalksRequest) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{20} }
-
-type ListTalksResponse struct {
-	Talk []*Talk `protobuf:"bytes,1,rep,name=talk" json:"talk,omitempty"`
-}
-
-func (m *ListTalksResponse) Reset()                    { *m = ListTalksResponse{} }
-func (m *ListTalksResponse) String() string            { return proto.CompactTextString(m) }
-func (*ListTalksResponse) ProtoMessage()               {}
-func (*ListTalksResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{21} }
-
-func (m *ListTalksResponse) GetTalk() []*Talk {
-	if m != nil {
-		return m.Talk
-	}
-	return nil
-}
+func (m *RecordDeliveryResponse) Reset()                    { *m = RecordDeliveryResponse{} }
+func (m *RecordDeliveryResponse) String() string            { return proto.CompactTextString(m) }
+func (*RecordDeliveryResponse) ProtoMessage()               {}
+func (*RecordDeliveryResponse) Descriptor() ([]byte, []int) { return fileDescriptor0, []int{4} }
 
 func init() {
-	proto.RegisterType((*ServerState)(nil), "api.ServerState")
-	proto.RegisterType((*RootData)(nil), "api.RootData")
-	proto.RegisterType((*User)(nil), "api.User")
-	proto.RegisterType((*Talk)(nil), "api.Talk")
+	proto.RegisterType((*Delivery)(nil), "api.Delivery")
 	proto.RegisterType((*FetchAllRequest)(nil), "api.FetchAllRequest")
 	proto.RegisterType((*FetchAllResponse)(nil), "api.FetchAllResponse")
-	proto.RegisterType((*AddUserRequest)(nil), "api.AddUserRequest")
-	proto.RegisterType((*AddUserResponse)(nil), "api.AddUserResponse")
-	proto.RegisterType((*AddTalkRequest)(nil), "api.AddTalkRequest")
-	proto.RegisterType((*AddTalkResponse)(nil), "api.AddTalkResponse")
-	proto.RegisterType((*ReorderRequest)(nil), "api.ReorderRequest")
-	proto.RegisterType((*ReorderResponse)(nil), "api.ReorderResponse")
-	proto.RegisterType((*GetUsersRequest)(nil), "api.GetUsersRequest")
-	proto.RegisterType((*GetUsersResponse)(nil), "api.GetUsersResponse")
-	proto.RegisterType((*UpdateUserRequest)(nil), "api.UpdateUserRequest")
-	proto.RegisterType((*UpdateUserResponse)(nil), "api.UpdateUserResponse")
-	proto.RegisterType((*RemoveUserRequest)(nil), "api.RemoveUserRequest")
-	proto.RegisterType((*RemoveUserResponse)(nil), "api.RemoveUserResponse")
-	proto.RegisterType((*CompleteTalkRequest)(nil), "api.CompleteTalkRequest")
-	proto.RegisterType((*CompleteTalkResponse)(nil), "api.CompleteTalkResponse")
-	proto.RegisterType((*ListTalksRequest)(nil), "api.ListTalksRequest")
-	proto.RegisterType((*ListTalksResponse)(nil), "api.ListTalksResponse")
+	proto.RegisterType((*RecordDeliveryRequest)(nil), "api.RecordDeliveryRequest")
+	proto.RegisterType((*RecordDeliveryResponse)(nil), "api.RecordDeliveryResponse")
 }
 
 // Reference imports to suppress errors if they are not otherwise used.
@@ -566,15 +131,7 @@ const _ = grpc.SupportPackageIsVersion4
 
 type ApiServiceClient interface {
 	FetchAll(ctx context.Context, in *FetchAllRequest, opts ...grpc.CallOption) (*FetchAllResponse, error)
-	GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error)
-	AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error)
-	UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error)
-	RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error)
-	// Change the position of one user in the list of upcoming talks.
-	Reorder(ctx context.Context, in *ReorderRequest, opts ...grpc.CallOption) (*ReorderResponse, error)
-	AddTalk(ctx context.Context, in *AddTalkRequest, opts ...grpc.CallOption) (*AddTalkResponse, error)
-	CompleteTalk(ctx context.Context, in *CompleteTalkRequest, opts ...grpc.CallOption) (*CompleteTalkResponse, error)
-	ListTalks(ctx context.Context, in *ListTalksRequest, opts ...grpc.CallOption) (*ListTalksResponse, error)
+	RecordDelivery(ctx context.Context, in *RecordDeliveryRequest, opts ...grpc.CallOption) (*RecordDeliveryResponse, error)
 }
 
 type apiServiceClient struct {
@@ -594,72 +151,9 @@ func (c *apiServiceClient) FetchAll(ctx context.Context, in *FetchAllRequest, op
 	return out, nil
 }
 
-func (c *apiServiceClient) GetUsers(ctx context.Context, in *GetUsersRequest, opts ...grpc.CallOption) (*GetUsersResponse, error) {
-	out := new(GetUsersResponse)
-	err := grpc.Invoke(ctx, "/api.ApiService/GetUsers", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *apiServiceClient) AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error) {
-	out := new(AddUserResponse)
-	err := grpc.Invoke(ctx, "/api.ApiService/AddUser", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *apiServiceClient) UpdateUser(ctx context.Context, in *UpdateUserRequest, opts ...grpc.CallOption) (*UpdateUserResponse, error) {
-	out := new(UpdateUserResponse)
-	err := grpc.Invoke(ctx, "/api.ApiService/UpdateUser", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *apiServiceClient) RemoveUser(ctx context.Context, in *RemoveUserRequest, opts ...grpc.CallOption) (*RemoveUserResponse, error) {
-	out := new(RemoveUserResponse)
-	err := grpc.Invoke(ctx, "/api.ApiService/RemoveUser", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *apiServiceClient) Reorder(ctx context.Context, in *ReorderRequest, opts ...grpc.CallOption) (*ReorderResponse, error) {
-	out := new(ReorderResponse)
-	err := grpc.Invoke(ctx, "/api.ApiService/Reorder", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *apiServiceClient) AddTalk(ctx context.Context, in *AddTalkRequest, opts ...grpc.CallOption) (*AddTalkResponse, error) {
-	out := new(AddTalkResponse)
-	err := grpc.Invoke(ctx, "/api.ApiService/AddTalk", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *apiServiceClient) CompleteTalk(ctx context.Context, in *CompleteTalkRequest, opts ...grpc.CallOption) (*CompleteTalkResponse, error) {
-	out := new(CompleteTalkResponse)
-	err := grpc.Invoke(ctx, "/api.ApiService/CompleteTalk", in, out, c.cc, opts...)
-	if err != nil {
-		return nil, err
-	}
-	return out, nil
-}
-
-func (c *apiServiceClient) ListTalks(ctx context.Context, in *ListTalksRequest, opts ...grpc.CallOption) (*ListTalksResponse, error) {
-	out := new(ListTalksResponse)
-	err := grpc.Invoke(ctx, "/api.ApiService/ListTalks", in, out, c.cc, opts...)
+func (c *apiServiceClient) RecordDelivery(ctx context.Context, in *RecordDeliveryRequest, opts ...grpc.CallOption) (*RecordDeliveryResponse, error) {
+	out := new(RecordDeliveryResponse)
+	err := grpc.Invoke(ctx, "/api.ApiService/RecordDelivery", in, out, c.cc, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -670,15 +164,7 @@ func (c *apiServiceClient) ListTalks(ctx context.Context, in *ListTalksRequest, 
 
 type ApiServiceServer interface {
 	FetchAll(context.Context, *FetchAllRequest) (*FetchAllResponse, error)
-	GetUsers(context.Context, *GetUsersRequest) (*GetUsersResponse, error)
-	AddUser(context.Context, *AddUserRequest) (*AddUserResponse, error)
-	UpdateUser(context.Context, *UpdateUserRequest) (*UpdateUserResponse, error)
-	RemoveUser(context.Context, *RemoveUserRequest) (*RemoveUserResponse, error)
-	// Change the position of one user in the list of upcoming talks.
-	Reorder(context.Context, *ReorderRequest) (*ReorderResponse, error)
-	AddTalk(context.Context, *AddTalkRequest) (*AddTalkResponse, error)
-	CompleteTalk(context.Context, *CompleteTalkRequest) (*CompleteTalkResponse, error)
-	ListTalks(context.Context, *ListTalksRequest) (*ListTalksResponse, error)
+	RecordDelivery(context.Context, *RecordDeliveryRequest) (*RecordDeliveryResponse, error)
 }
 
 func RegisterApiServiceServer(s *grpc.Server, srv ApiServiceServer) {
@@ -703,146 +189,20 @@ func _ApiService_FetchAll_Handler(srv interface{}, ctx context.Context, dec func
 	return interceptor(ctx, in, info, handler)
 }
 
-func _ApiService_GetUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(GetUsersRequest)
+func _ApiService_RecordDelivery_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(RecordDeliveryRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(ApiServiceServer).GetUsers(ctx, in)
+		return srv.(ApiServiceServer).RecordDelivery(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/api.ApiService/GetUsers",
+		FullMethod: "/api.ApiService/RecordDelivery",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).GetUsers(ctx, req.(*GetUsersRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ApiService_AddUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ApiServiceServer).AddUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.ApiService/AddUser",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).AddUser(ctx, req.(*AddUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ApiService_UpdateUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(UpdateUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ApiServiceServer).UpdateUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.ApiService/UpdateUser",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).UpdateUser(ctx, req.(*UpdateUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ApiService_RemoveUser_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(RemoveUserRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ApiServiceServer).RemoveUser(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.ApiService/RemoveUser",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).RemoveUser(ctx, req.(*RemoveUserRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ApiService_Reorder_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ReorderRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ApiServiceServer).Reorder(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.ApiService/Reorder",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).Reorder(ctx, req.(*ReorderRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ApiService_AddTalk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(AddTalkRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ApiServiceServer).AddTalk(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.ApiService/AddTalk",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).AddTalk(ctx, req.(*AddTalkRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ApiService_CompleteTalk_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(CompleteTalkRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ApiServiceServer).CompleteTalk(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.ApiService/CompleteTalk",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).CompleteTalk(ctx, req.(*CompleteTalkRequest))
-	}
-	return interceptor(ctx, in, info, handler)
-}
-
-func _ApiService_ListTalks_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListTalksRequest)
-	if err := dec(in); err != nil {
-		return nil, err
-	}
-	if interceptor == nil {
-		return srv.(ApiServiceServer).ListTalks(ctx, in)
-	}
-	info := &grpc.UnaryServerInfo{
-		Server:     srv,
-		FullMethod: "/api.ApiService/ListTalks",
-	}
-	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(ApiServiceServer).ListTalks(ctx, req.(*ListTalksRequest))
+		return srv.(ApiServiceServer).RecordDelivery(ctx, req.(*RecordDeliveryRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -856,36 +216,8 @@ var _ApiService_serviceDesc = grpc.ServiceDesc{
 			Handler:    _ApiService_FetchAll_Handler,
 		},
 		{
-			MethodName: "GetUsers",
-			Handler:    _ApiService_GetUsers_Handler,
-		},
-		{
-			MethodName: "AddUser",
-			Handler:    _ApiService_AddUser_Handler,
-		},
-		{
-			MethodName: "UpdateUser",
-			Handler:    _ApiService_UpdateUser_Handler,
-		},
-		{
-			MethodName: "RemoveUser",
-			Handler:    _ApiService_RemoveUser_Handler,
-		},
-		{
-			MethodName: "Reorder",
-			Handler:    _ApiService_Reorder_Handler,
-		},
-		{
-			MethodName: "AddTalk",
-			Handler:    _ApiService_AddTalk_Handler,
-		},
-		{
-			MethodName: "CompleteTalk",
-			Handler:    _ApiService_CompleteTalk_Handler,
-		},
-		{
-			MethodName: "ListTalks",
-			Handler:    _ApiService_ListTalks_Handler,
+			MethodName: "RecordDelivery",
+			Handler:    _ApiService_RecordDelivery_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
@@ -895,57 +227,23 @@ var _ApiService_serviceDesc = grpc.ServiceDesc{
 func init() { proto.RegisterFile("api.proto", fileDescriptor0) }
 
 var fileDescriptor0 = []byte{
-	// 828 bytes of a gzipped FileDescriptorProto
-	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x94, 0x96, 0xcd, 0x6e, 0xd3, 0x40,
-	0x10, 0xc7, 0x65, 0x3b, 0x49, 0xed, 0x49, 0xdb, 0x24, 0x9b, 0x34, 0xb8, 0x56, 0x41, 0xd1, 0x8a,
-	0x43, 0x28, 0x6a, 0x23, 0xc2, 0x0d, 0x71, 0xa9, 0x40, 0xad, 0x22, 0xaa, 0x1e, 0x5c, 0x2a, 0x21,
-	0x71, 0xda, 0xda, 0xdb, 0xd6, 0xd4, 0xf5, 0x1a, 0xdb, 0x8d, 0x90, 0x10, 0x17, 0x0e, 0xbc, 0x00,
-	0x07, 0x24, 0x5e, 0x8b, 0x57, 0xe0, 0x0d, 0x78, 0x01, 0xb4, 0xeb, 0xf5, 0x67, 0x0c, 0x94, 0x9b,
-	0x67, 0x76, 0xf6, 0x37, 0x93, 0x99, 0xff, 0x6c, 0x0b, 0x06, 0x09, 0xbd, 0xfd, 0x30, 0x62, 0x09,
-	0x43, 0x1a, 0x09, 0x3d, 0x6b, 0xe7, 0x92, 0xb1, 0x4b, 0x9f, 0xce, 0x48, 0xe8, 0xcd, 0x48, 0x10,
-	0xb0, 0x84, 0x24, 0x1e, 0x0b, 0xe2, 0x34, 0x04, 0x3b, 0xd0, 0x3d, 0xa5, 0xd1, 0x92, 0x46, 0xa7,
-	0x09, 0x49, 0x28, 0xba, 0x0f, 0xad, 0xdb, 0x98, 0x46, 0xa6, 0x32, 0xd1, 0xa6, 0xdd, 0xb9, 0xb1,
-	0xcf, 0x59, 0x67, 0x31, 0x8d, 0x6c, 0xe1, 0xe6, 0xc7, 0x09, 0xf1, 0xaf, 0x4d, 0xb5, 0x74, 0xfc,
-	0x9a, 0xf8, 0xd7, 0xb6, 0x70, 0xa3, 0x31, 0x74, 0x02, 0xfa, 0x21, 0x59, 0xb8, 0xa6, 0x36, 0x51,
-	0xa6, 0x9a, 0x2d, 0x2d, 0x3c, 0x01, 0xdd, 0x66, 0x2c, 0x79, 0x49, 0x12, 0x82, 0x46, 0xd0, 0x66,
-	0x91, 0x2b, 0x53, 0x68, 0x76, 0x6a, 0xe0, 0x43, 0x68, 0xf1, 0x34, 0x68, 0x13, 0x54, 0xcf, 0x35,
-	0x15, 0x71, 0x5b, 0xf5, 0x5c, 0x84, 0xa0, 0x15, 0x90, 0x1b, 0x6a, 0xaa, 0x13, 0x65, 0x6a, 0xd8,
-	0xe2, 0x1b, 0x59, 0xa0, 0x73, 0x2e, 0xcf, 0x2b, 0xf2, 0x18, 0x76, 0x6e, 0xe3, 0xef, 0x0a, 0xb4,
-	0xf8, 0xc7, 0x9d, 0x40, 0x3b, 0x60, 0xc4, 0x21, 0x25, 0xd7, 0x34, 0xca, 0x2b, 0x2e, 0x1c, 0xfc,
-	0x86, 0xcb, 0x02, 0x6a, 0xb6, 0x26, 0xca, 0x54, 0xb7, 0xc5, 0x37, 0xea, 0x83, 0x76, 0x1b, 0xf9,
-	0x66, 0x7b, 0xa2, 0x4d, 0x0d, 0x9b, 0x7f, 0xa2, 0x5d, 0xe8, 0x3b, 0xec, 0x26, 0xf4, 0x69, 0x42,
-	0xdd, 0x53, 0xea, 0xb0, 0xc0, 0x8d, 0xcd, 0x8e, 0x40, 0xad, 0xf8, 0xf1, 0x00, 0x7a, 0x87, 0x34,
-	0x71, 0xae, 0x0e, 0x7c, 0xdf, 0xa6, 0xef, 0x6f, 0x69, 0x9c, 0xe0, 0x77, 0xd0, 0x2f, 0x5c, 0x71,
-	0xc8, 0x82, 0x98, 0x22, 0x13, 0xd6, 0x96, 0x34, 0x8a, 0x3d, 0x16, 0x88, 0xfa, 0x0d, 0x3b, 0x33,
-	0xf3, 0xe9, 0xa8, 0x7f, 0x9f, 0x8e, 0xd6, 0x38, 0x1d, 0xfc, 0x10, 0x36, 0x0f, 0x5c, 0x57, 0xc4,
-	0xa7, 0xd9, 0xf3, 0xa6, 0x28, 0x45, 0x53, 0xf0, 0x23, 0xe8, 0xe5, 0x51, 0xb2, 0xa0, 0x31, 0x74,
-	0x38, 0x7f, 0x91, 0xf5, 0x53, 0x5a, 0xf8, 0xb9, 0x00, 0x8a, 0x0c, 0x12, 0xf8, 0x87, 0xc8, 0xa6,
-	0xee, 0xcb, 0x44, 0xe9, 0xed, 0x22, 0x11, 0xaf, 0xb4, 0xb8, 0x9e, 0x5a, 0xf8, 0x8b, 0x02, 0x9b,
-	0x36, 0x15, 0x4a, 0xc9, 0x32, 0xd5, 0x9a, 0xa4, 0x15, 0x4d, 0x7a, 0x00, 0x70, 0xc3, 0x96, 0xf4,
-	0x2c, 0xad, 0x43, 0x15, 0x87, 0x25, 0x0f, 0xc2, 0xb0, 0x4e, 0x02, 0xe7, 0x8a, 0x45, 0x32, 0x22,
-	0x1d, 0x7c, 0xc5, 0xc7, 0x0b, 0x39, 0xa7, 0x17, 0x2c, 0xca, 0xa6, 0x2f, 0x2d, 0x7c, 0x04, 0xbd,
-	0xbc, 0x0e, 0x59, 0xb3, 0x05, 0x3a, 0x71, 0x1c, 0x1a, 0x26, 0x34, 0xad, 0x5a, 0xb7, 0x73, 0xbb,
-	0x5c, 0xa4, 0x5a, 0x99, 0x24, 0x97, 0xc2, 0x11, 0x4d, 0x78, 0xb6, 0x38, 0x93, 0xc2, 0x2b, 0xe8,
-	0x17, 0xae, 0x66, 0x29, 0x68, 0x77, 0x95, 0x02, 0xfe, 0xa6, 0xc0, 0xe0, 0x2c, 0x74, 0x49, 0x42,
-	0xcb, 0xf3, 0xfe, 0x8f, 0xf1, 0xf0, 0xd4, 0x57, 0x24, 0x3e, 0xe1, 0x6e, 0x4d, 0xfc, 0xac, 0xcc,
-	0xac, 0xec, 0x5f, 0xab, 0xba, 0x7f, 0x68, 0x02, 0x5d, 0x1e, 0x96, 0x1d, 0xb7, 0xc5, 0xcd, 0xb2,
-	0x0b, 0x8f, 0x00, 0x95, 0x0b, 0x4b, 0x7f, 0x28, 0x7e, 0x0c, 0x03, 0x9b, 0x66, 0x43, 0xfa, 0x47,
-	0xb9, 0x1c, 0x51, 0x0e, 0x96, 0x88, 0x3d, 0x18, 0xbe, 0x90, 0x1b, 0x77, 0x07, 0x49, 0xe2, 0x31,
-	0x8c, 0xaa, 0xe1, 0x12, 0x83, 0xa0, 0x7f, 0xec, 0xc5, 0xa2, 0xd6, 0x7c, 0x34, 0x73, 0x18, 0x94,
-	0x7c, 0x72, 0x36, 0xd9, 0xb6, 0x29, 0x8d, 0xdb, 0x36, 0xff, 0xd5, 0x06, 0x38, 0x08, 0x3d, 0xfe,
-	0xb8, 0x7a, 0x0e, 0x45, 0x27, 0xa0, 0x67, 0x8b, 0x8e, 0x46, 0x22, 0xb6, 0xf6, 0x14, 0x58, 0x5b,
-	0x35, 0xaf, 0xac, 0x67, 0xeb, 0xf3, 0x8f, 0x9f, 0x5f, 0xd5, 0x1e, 0xda, 0x98, 0x2d, 0x9f, 0xcc,
-	0x2e, 0xf8, 0xe9, 0x1e, 0xf1, 0x7d, 0xb4, 0x00, 0x3d, 0x53, 0x8b, 0xe4, 0xd5, 0xf4, 0x24, 0x79,
-	0x75, 0x49, 0xe1, 0xbe, 0xe0, 0x01, 0xd2, 0x39, 0x4f, 0x3c, 0x1b, 0x0b, 0x58, 0x93, 0x1b, 0x8f,
-	0x86, 0xe2, 0x4e, 0xf5, 0x95, 0xb0, 0x46, 0x55, 0xa7, 0xe4, 0x0c, 0x05, 0x67, 0x03, 0xe7, 0x9c,
-	0x67, 0xca, 0x2e, 0x7a, 0x0b, 0x50, 0x0c, 0x17, 0x8d, 0x53, 0x55, 0xd6, 0x65, 0x68, 0xdd, 0x5b,
-	0xf1, 0x4b, 0xe6, 0x8e, 0x60, 0x8e, 0xe7, 0x83, 0x8c, 0x39, 0xfb, 0x98, 0x4e, 0xeb, 0x13, 0x87,
-	0xbf, 0x01, 0x28, 0xc6, 0x2e, 0xe1, 0x2b, 0xa2, 0x91, 0xf0, 0x06, 0x7d, 0x6c, 0x0b, 0xf8, 0x70,
-	0x77, 0x15, 0x8e, 0x8e, 0x61, 0x4d, 0xae, 0xb5, 0xec, 0x40, 0xf5, 0xb1, 0x91, 0x1d, 0xa8, 0x6d,
-	0x3e, 0x1e, 0x0b, 0x60, 0x1f, 0x77, 0x39, 0x30, 0x4a, 0x0f, 0x79, 0x9d, 0x69, 0x3f, 0xc5, 0x3a,
-	0xe4, 0xfd, 0x2c, 0x29, 0xb2, 0xe8, 0x67, 0x45, 0x77, 0x95, 0x7e, 0x72, 0x05, 0x71, 0x14, 0x81,
-	0xf5, 0xb2, 0x48, 0x91, 0x29, 0xae, 0x36, 0xc8, 0xdc, 0xda, 0x6e, 0x38, 0xa9, 0x76, 0x15, 0x0f,
-	0x32, 0xf2, 0x2c, 0xfb, 0xcb, 0xc4, 0x53, 0x1c, 0x83, 0x91, 0x6b, 0x1b, 0xa5, 0x9a, 0xa9, 0xeb,
-	0xdf, 0x1a, 0xd7, 0xdd, 0x4d, 0x5a, 0xe2, 0xe4, 0xf3, 0x8e, 0xf8, 0xaf, 0xe2, 0xe9, 0xef, 0x00,
-	0x00, 0x00, 0xff, 0xff, 0xbe, 0x4a, 0x95, 0xc2, 0x85, 0x08, 0x00, 0x00,
+	// 279 bytes of a gzipped FileDescriptorProto
+	0x1f, 0x8b, 0x08, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02, 0xff, 0x6c, 0x91, 0xc1, 0x4a, 0xc3, 0x40,
+	0x10, 0x86, 0x49, 0x23, 0x92, 0x8e, 0xd6, 0xea, 0x60, 0x24, 0x44, 0x0f, 0x61, 0x4f, 0x11, 0xb1,
+	0xc1, 0x78, 0xf6, 0x50, 0x10, 0x8f, 0x1e, 0xe2, 0xd9, 0xc3, 0x9a, 0x8c, 0x75, 0x61, 0xcd, 0xae,
+	0xc9, 0x1a, 0xf0, 0xea, 0x2b, 0xf8, 0x38, 0x3e, 0x86, 0xaf, 0xe0, 0x83, 0x48, 0x76, 0xdb, 0x4a,
+	0x43, 0x6f, 0xc3, 0xfc, 0xb3, 0xff, 0xf7, 0xc1, 0xc2, 0x98, 0x6b, 0x31, 0xd3, 0x8d, 0x32, 0x0a,
+	0x7d, 0xae, 0x45, 0x7c, 0xb6, 0x50, 0x6a, 0x21, 0x29, 0xe3, 0x5a, 0x64, 0xbc, 0xae, 0x95, 0xe1,
+	0x46, 0xa8, 0xba, 0x75, 0x27, 0x2c, 0x87, 0xe0, 0x96, 0xa4, 0xe8, 0xa8, 0xf9, 0x40, 0x84, 0x9d,
+	0x8a, 0x1b, 0x8a, 0xbc, 0xc4, 0x4b, 0xc7, 0x85, 0x9d, 0xfb, 0x9d, 0x11, 0xaf, 0x14, 0x8d, 0x12,
+	0x2f, 0xf5, 0x0b, 0x3b, 0xb3, 0x23, 0x98, 0xde, 0x91, 0x29, 0x5f, 0xe6, 0x52, 0x16, 0xf4, 0xf6,
+	0x4e, 0xad, 0x61, 0x37, 0x70, 0xf8, 0xbf, 0x6a, 0xb5, 0xaa, 0x5b, 0xc2, 0x73, 0x08, 0xaa, 0x65,
+	0x75, 0xe4, 0x25, 0x7e, 0xba, 0x97, 0x4f, 0x66, 0xbd, 0xdb, 0x8a, 0x57, 0xac, 0x63, 0x76, 0x01,
+	0x61, 0x41, 0xa5, 0x6a, 0xaa, 0x75, 0xe6, 0x7a, 0x37, 0x94, 0x7c, 0xa7, 0xc4, 0x22, 0x38, 0x19,
+	0x1e, 0x3b, 0x62, 0xfe, 0xed, 0x01, 0xcc, 0xb5, 0x78, 0xa0, 0xa6, 0x13, 0x25, 0xe1, 0x3d, 0x04,
+	0x2b, 0x29, 0x3c, 0xb6, 0xe8, 0x81, 0x76, 0x1c, 0x0e, 0xb6, 0xae, 0x87, 0x85, 0x9f, 0x3f, 0xbf,
+	0x5f, 0xa3, 0x29, 0x4e, 0xb2, 0xee, 0x2a, 0x7b, 0xee, 0xd3, 0x4b, 0x2e, 0x25, 0x3e, 0xc2, 0xc1,
+	0x26, 0x18, 0x63, 0xfb, 0x7e, 0xab, 0x7a, 0x7c, 0xba, 0x35, 0x5b, 0x12, 0xd0, 0x12, 0xf6, 0x11,
+	0x7a, 0x42, 0x63, 0x6f, 0x9e, 0x76, 0xed, 0x8f, 0x5c, 0xff, 0x05, 0x00, 0x00, 0xff, 0xff, 0x58,
+	0xe5, 0xad, 0x2b, 0xc1, 0x01, 0x00, 0x00,
 }

@@ -1,13 +1,10 @@
 package main
 
 import (
-	"fmt"
 	"time"
 
-	"google.golang.org/api/iterator"
-
 	"cloud.google.com/go/datastore"
-	"github.com/soulplant/talk-tracker/api"
+	"github.com/soulplant/jim-tracker/api"
 	context "golang.org/x/net/context"
 )
 
@@ -17,335 +14,44 @@ type dsApiService struct {
 	client *datastore.Client
 }
 
-func userKey(id int64) *datastore.Key {
-	key := datastore.IDKey("user", id, nil)
-	key.Namespace = *namespace
-	return key
-}
-
-func talkKey(id int64) *datastore.Key {
-	key := datastore.IDKey("talk", id, nil)
-	key.Namespace = *namespace
-	return key
-}
-
 // NewDsApiService constructs an api service that is backed by the given.
 func NewDsApiService(client *datastore.Client) *dsApiService {
-	key := datastore.NameKey("order", "order", nil)
+	key := datastore.NameKey("jimtracker", "root", nil)
 	key.Namespace = *namespace
 	return &dsApiService{key, client}
 }
-
-type rootData api.RootData
 
 func (s *dsApiService) Close() {
 	s.client.Close()
 }
 
-// Init initialises the datastore with an empty root object.
-func (s *dsApiService) Init() error {
-	_, err := s.client.RunInTransaction(context.Background(), func(tx *datastore.Transaction) error {
-		var root rootData
-		err := tx.Get(s.key, &root)
-		if err == nil {
-			fmt.Println("Found root data, skipping initialisation")
-			return nil
-		}
+var recentQueries = datastore.NewQuery("Delivery").Namespace(*namespace).Order("-date").Limit(50)
 
-		if err == datastore.ErrNoSuchEntity {
-			fmt.Println("Can't find the root data, so creating it")
-			root = rootData{Order: []int64{}}
-			_, err := s.client.Put(context.Background(), s.key, &root)
-			return err
-		}
-		return err
-	})
-	return err
+func deliveryKey(name string) *datastore.Key {
+	key := datastore.NameKey("Delivery", name, nil)
+	key.Namespace = *namespace
+	return key
 }
 
 func (s *dsApiService) FetchAll(ctx context.Context, req *api.FetchAllRequest) (*api.FetchAllResponse, error) {
-	users, err := s.GetUsers(ctx, &api.GetUsersRequest{})
-	if err != nil {
+	q := datastore.NewQuery("Delivery").Namespace(*namespace).Order("-Date").Limit(50)
+	var resp []*api.Delivery
+	if _, err := s.client.GetAll(ctx, q, &resp); err != nil {
 		return nil, err
 	}
 	return &api.FetchAllResponse{
-		User: users.User,
+		Delivery: resp,
 	}, nil
 }
 
-func (s *dsApiService) GetUsers(ctx context.Context, req *api.GetUsersRequest) (*api.GetUsersResponse, error) {
-	var resp *api.GetUsersResponse
-	_, err := s.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var data rootData
-		if err := tx.Get(s.key, &data); err != nil {
-			return fmt.Errorf("Failed to get data %s", err)
-		}
-		keys := []*datastore.Key{}
-		for _, id := range data.Order {
-			keys = append(keys, userKey(id))
-		}
-		users := make([]*api.User, len(keys))
-		if err := tx.GetMulti(keys, users); err != nil {
-			return fmt.Errorf("GetMulti failed: %s", err)
-		}
-		for i, u := range users {
-			u.Id = keys[i].ID
-		}
-		resp = &api.GetUsersResponse{
-			User: users,
-		}
-		return nil
+func (s *dsApiService) RecordDelivery(ctx context.Context, in *api.RecordDeliveryRequest) (*api.RecordDeliveryResponse, error) {
+	date := time.Unix(in.Date, 0).Format("20060102")
+	_, err := s.client.Put(ctx, deliveryKey(date), &api.Delivery{
+		Date: date,
+		Time: in.Date,
 	})
 	if err != nil {
 		return nil, err
 	}
-	return resp, nil
-}
-
-func (s *dsApiService) AddUser(ctx context.Context, req *api.AddUserRequest) (*api.AddUserResponse, error) {
-	key := userKey(0)
-	user := api.User{
-		Name: req.GetName(),
-	}
-	key, err := s.client.Put(ctx, key, &user)
-	if err != nil {
-		return nil, fmt.Errorf("Failed to create a new user: %v", err)
-	}
-	_, err = s.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var data rootData
-		err := tx.Get(s.key, &data)
-		if err != nil {
-			return err
-		}
-		data.Order = append(data.Order, key.ID)
-		_, err = tx.Put(s.key, &data)
-		return err
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &api.AddUserResponse{
-		UserId: key.ID,
-	}, nil
-}
-
-func (s *dsApiService) AddTalk(ctx context.Context, req *api.AddTalkRequest) (*api.AddTalkResponse, error) {
-	key, err := s.client.Put(ctx, talkKey(0), &api.Talk{
-		SpeakerId:        req.UserId,
-		Name:             req.Name,
-		CompletedSeconds: time.Now().Unix(),
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &api.AddTalkResponse{
-		TalkId: key.ID,
-	}, nil
-}
-
-// indexOf returns the index of needle in haystack, or -1 if it isn't in haystack.
-func indexOf(haystack []int64, needle int64) int {
-	for i, h := range haystack {
-		if h == needle {
-			return i
-		}
-	}
-	return -1
-}
-
-// removeItem removes r from ns if present, and returns an error otherwise
-func removeItem(ns []int64, r int64) ([]int64, error) {
-	i := indexOf(ns, r)
-	if i == -1 {
-		return nil, fmt.Errorf("Item not found in list %d %v", r, ns)
-	}
-	tmp := ns[:i]
-	tmp = append(tmp, ns[i+1:]...)
-	return tmp, nil
-}
-
-func (s *dsApiService) Reorder(ctx context.Context, req *api.ReorderRequest) (*api.ReorderResponse, error) {
-	_, err := s.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var data rootData
-		err := tx.Get(s.key, &data)
-		if err != nil {
-			return err
-		}
-		order := data.Order
-		ai := indexOf(order, req.AnchorUserId)
-		if ai == -1 {
-			return fmt.Errorf("Couldn't find anchor item in order")
-		}
-		mi := indexOf(order, req.MoveUserId)
-		if mi == -1 {
-			return fmt.Errorf("Couldn't find move item in order")
-		}
-
-		ins := ai
-		if !req.GetBefore() {
-			ins += 1
-		}
-		if mi < ai {
-			var tmp []int64
-			tmp = append(tmp, order[:mi]...)
-			tmp = append(tmp, order[mi+1:ins]...)
-			tmp = append(tmp, order[mi])
-			tmp = append(tmp, order[ins:]...)
-			order = tmp
-		} else {
-			var tmp []int64
-			tmp = append(tmp, order[:ins]...)
-			tmp = append(tmp, order[mi])
-			tmp = append(tmp, order[ins:mi]...)
-			tmp = append(tmp, order[mi+1:]...)
-			order = tmp
-		}
-		data.Order = order
-		_, err = tx.Put(s.key, &data)
-		return err
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return &api.ReorderResponse{
-		Accepted: true,
-	}, nil
-}
-
-func (s *dsApiService) UpdateUser(ctx context.Context, req *api.UpdateUserRequest) (*api.UpdateUserResponse, error) {
-	_, err := s.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		return s.updateUser(ctx, tx, req)
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &api.UpdateUserResponse{}, nil
-}
-
-// updateUser is the same as UpdateUser, but it doesn't run in a transaction so
-// its operations can be run as part of a larger transaction.
-func (s *dsApiService) updateUser(ctx context.Context, tx *datastore.Transaction, req *api.UpdateUserRequest) error {
-	var user api.User
-	key := userKey(req.GetUserId())
-	err := tx.Get(key, &user)
-	if err != nil {
-		return err
-	}
-	empty := true
-	if req.GetHasName() {
-		user.Name = req.GetName()
-		empty = false
-	}
-	if req.GetHasNextTalk() {
-		user.NextTalk = req.GetNextTalk()
-		empty = false
-	}
-	if empty {
-		return fmt.Errorf("UpdateUser request requests no changes, have you set the Has* fields?")
-	}
-	_, err = tx.Put(key, &user)
-	return err
-}
-
-func (d *rootData) MoveUserToEnd(userId int64) error {
-	i := indexOf(d.Order, userId)
-	if i == -1 {
-		return fmt.Errorf("User %d is not present in the rotation", userId)
-	}
-	tmp := d.Order[:i]
-	tmp = append(tmp, d.Order[i+1:]...)
-	tmp = append(tmp, userId)
-	d.Order = tmp
-	return nil
-}
-
-func (d *rootData) RemoveUser(userId int64) error {
-	tmp, err := removeItem(d.Order, userId)
-	if err != nil {
-		return err
-	}
-	d.Order = tmp
-	return nil
-}
-
-// RemoveUser removes the specified user from the talk rotation. Note that it
-// doesn't delete the user object itself.
-func (s *dsApiService) RemoveUser(ctx context.Context, req *api.RemoveUserRequest) (*api.RemoveUserResponse, error) {
-	_, err := s.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var data rootData
-		if err := tx.Get(s.key, &data); err != nil {
-			return err
-		}
-		if err := data.RemoveUser(req.UserId); err != nil {
-			return err
-		}
-		_, err := tx.Put(s.key, &data)
-		return err
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &api.RemoveUserResponse{}, nil
-}
-
-func (s *dsApiService) CompleteTalk(ctx context.Context, req *api.CompleteTalkRequest) (*api.CompleteTalkResponse, error) {
-	_, err := s.client.RunInTransaction(ctx, func(tx *datastore.Transaction) error {
-		var data rootData
-		if err := tx.Get(s.key, &data); err != nil {
-			return err
-		}
-		if err := data.MoveUserToEnd(req.UserId); err != nil {
-			return err
-		}
-		if _, err := tx.Put(s.key, &data); err != nil {
-			return err
-		}
-		var user api.User
-		err := tx.Get(userKey(req.GetUserId()), &user)
-		if err != nil {
-			return err
-		}
-
-		talk := api.Talk{
-			SpeakerId:        req.GetUserId(),
-			CompletedSeconds: time.Now().Unix(),
-			Done:             true,
-			Name:             user.NextTalk,
-		}
-		_, err = tx.Put(talkKey(0), &talk)
-		if err != nil {
-			return err
-		}
-
-		return s.updateUser(ctx, tx, &api.UpdateUserRequest{
-			UserId:      req.GetUserId(),
-			HasNextTalk: true,
-			NextTalk:    "",
-		})
-	})
-	if err != nil {
-		return nil, err
-	}
-	return &api.CompleteTalkResponse{}, nil
-}
-
-func (s *dsApiService) ListTalks(ctx context.Context, req *api.ListTalksRequest) (*api.ListTalksResponse, error) {
-	it := s.client.Run(ctx, datastore.NewQuery("talk").Order("-CompletedSeconds").Namespace(*namespace))
-	talks := []*api.Talk{}
-	for {
-		var talk api.Talk
-		key, err := it.Next(&talk)
-		if err == iterator.Done {
-			break
-		}
-		if err != nil {
-			return nil, err
-		}
-		talk.Id = key.ID
-		talks = append(talks, &talk)
-	}
-	return &api.ListTalksResponse{
-		Talk: talks,
-	}, nil
+	return &api.RecordDeliveryResponse{}, nil
 }

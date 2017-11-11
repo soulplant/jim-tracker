@@ -31,188 +31,24 @@
         ]
       }
     },
-    "/v1/reorder": {
-      "post": {
-        "summary": "Change the position of one user in the list of upcoming talks.",
-        "operationId": "Reorder",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiReorderResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiReorderRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ApiService"
-        ]
-      }
-    },
-    "/v1/talk": {
+    "/v1/record": {
       "get": {
-        "operationId": "ListTalks",
+        "operationId": "RecordDelivery",
         "responses": {
           "200": {
             "description": "",
             "schema": {
-              "$ref": "#/definitions/apiListTalksResponse"
-            }
-          }
-        },
-        "tags": [
-          "ApiService"
-        ]
-      },
-      "post": {
-        "operationId": "AddTalk",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiAddTalkResponse"
+              "$ref": "#/definitions/apiRecordDeliveryResponse"
             }
           }
         },
         "parameters": [
           {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiAddTalkRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ApiService"
-        ]
-      }
-    },
-    "/v1/talk/complete": {
-      "post": {
-        "operationId": "CompleteTalk",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiCompleteTalkResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiCompleteTalkRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ApiService"
-        ]
-      }
-    },
-    "/v1/user": {
-      "get": {
-        "operationId": "GetUsers",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiGetUsersResponse"
-            }
-          }
-        },
-        "tags": [
-          "ApiService"
-        ]
-      },
-      "post": {
-        "operationId": "AddUser",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiAddUserResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiAddUserRequest"
-            }
-          }
-        ],
-        "tags": [
-          "ApiService"
-        ]
-      }
-    },
-    "/v1/user/{userId}": {
-      "delete": {
-        "operationId": "RemoveUser",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiRemoveUserResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
+            "name": "date",
+            "in": "query",
+            "required": false,
             "type": "string",
             "format": "int64"
-          }
-        ],
-        "tags": [
-          "ApiService"
-        ]
-      },
-      "patch": {
-        "operationId": "UpdateUser",
-        "responses": {
-          "200": {
-            "description": "",
-            "schema": {
-              "$ref": "#/definitions/apiUpdateUserResponse"
-            }
-          }
-        },
-        "parameters": [
-          {
-            "name": "userId",
-            "in": "path",
-            "required": true,
-            "type": "string",
-            "format": "int64"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "$ref": "#/definitions/apiUpdateUserRequest"
-            }
           }
         ],
         "tags": [
@@ -222,210 +58,33 @@
     }
   },
   "definitions": {
-    "apiAddTalkRequest": {
+    "apiDelivery": {
       "type": "object",
       "properties": {
-        "userId": {
+        "date": {
           "type": "string",
-          "format": "int64"
+          "description": "The date this delivery is for in YYYYMMDD."
         },
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "apiAddTalkResponse": {
-      "type": "object",
-      "properties": {
-        "talkId": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "apiAddUserRequest": {
-      "type": "object",
-      "properties": {
-        "name": {
-          "type": "string"
-        }
-      }
-    },
-    "apiAddUserResponse": {
-      "type": "object",
-      "properties": {
-        "userId": {
+        "time": {
           "type": "string",
           "format": "int64",
-          "description": "The newly added user."
+          "description": "The timestamp of the delivery."
         }
       }
-    },
-    "apiCompleteTalkRequest": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "format": "int64"
-        }
-      }
-    },
-    "apiCompleteTalkResponse": {
-      "type": "object"
     },
     "apiFetchAllResponse": {
       "type": "object",
       "properties": {
-        "version": {
-          "type": "string"
-        },
-        "user": {
+        "delivery": {
           "type": "array",
           "items": {
-            "$ref": "#/definitions/apiUser"
-          }
-        },
-        "talk": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTalk"
+            "$ref": "#/definitions/apiDelivery"
           }
         }
       }
     },
-    "apiGetUsersResponse": {
-      "type": "object",
-      "properties": {
-        "version": {
-          "type": "string",
-          "format": "int64"
-        },
-        "user": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiUser"
-          }
-        }
-      }
-    },
-    "apiListTalksResponse": {
-      "type": "object",
-      "properties": {
-        "talk": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/apiTalk"
-          }
-        }
-      }
-    },
-    "apiRemoveUserResponse": {
+    "apiRecordDeliveryResponse": {
       "type": "object"
-    },
-    "apiReorderRequest": {
-      "type": "object",
-      "properties": {
-        "version": {
-          "type": "string",
-          "format": "int64"
-        },
-        "moveUserId": {
-          "type": "string",
-          "format": "int64"
-        },
-        "anchorUserId": {
-          "type": "string",
-          "format": "int64"
-        },
-        "before": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      }
-    },
-    "apiReorderResponse": {
-      "type": "object",
-      "properties": {
-        "accepted": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "version": {
-          "type": "string"
-        }
-      }
-    },
-    "apiTalk": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        },
-        "speakerId": {
-          "type": "string",
-          "format": "int64"
-        },
-        "done": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "url": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "completedSeconds": {
-          "type": "string",
-          "format": "int64",
-          "description": "Timestamp for when this task was completed in seconds from the epoch."
-        }
-      }
-    },
-    "apiUpdateUserRequest": {
-      "type": "object",
-      "properties": {
-        "userId": {
-          "type": "string",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        },
-        "hasName": {
-          "type": "boolean",
-          "format": "boolean"
-        },
-        "nextTalk": {
-          "type": "string"
-        },
-        "hasNextTalk": {
-          "type": "boolean",
-          "format": "boolean"
-        }
-      }
-    },
-    "apiUpdateUserResponse": {
-      "type": "object"
-    },
-    "apiUser": {
-      "type": "object",
-      "properties": {
-        "id": {
-          "type": "string",
-          "format": "int64"
-        },
-        "name": {
-          "type": "string"
-        },
-        "nextTalk": {
-          "type": "string"
-        }
-      }
     }
   }
 }

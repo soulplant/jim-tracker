@@ -4,111 +4,28 @@ package api;
 
 import "google/api/annotations.proto";
 
-message ServerState {
-    repeated User user = 1;
-    repeated Talk talk = 2;
-    int64 nextId = 3;
-}
+message Delivery {
+  // The date this delivery is for in YYYYMMDD.
+  string date = 1;
 
-message RootData {
-  // The ids of users in the order that they are scheduled to give a talk.
-  repeated int64 order = 1;
-}
-
-message User {
-  int64 id = 1;
-  string name = 2;
-  string nextTalk = 3;
-}
-
-message Talk {
-  int64 id = 1;
-  string name = 2;
-  int64 speakerId = 3;
-  bool done = 4;
-  repeated string url = 5;
-
-  // Timestamp for when this task was completed in seconds from the epoch.
-  int64 completedSeconds = 6;
+  // The timestamp of the delivery.
+  int64 time = 2;
 }
 
 message FetchAllRequest {
+
 }
 
 message FetchAllResponse {
-  string version = 1;
-  repeated User user = 2;
-  repeated Talk talk = 3;
+  repeated Delivery delivery = 1;
 }
 
-message AddUserRequest {
-  string name = 1;
+message RecordDeliveryRequest {
+  int64 date = 1;
 }
 
-message AddUserResponse {
-  // The newly added user.
-  int64 userId = 1;
-}
+message RecordDeliveryResponse {
 
-message AddTalkRequest {
-  int64 userId = 1;
-  string name = 2;
-}
-
-message AddTalkResponse {
-  int64 talkId = 1;
-}
-
-message ReorderRequest {
-  int64 version = 1;
-  int64 moveUserId = 2;
-  int64 anchorUserId = 3;
-  bool before = 4;
-}
-
-message ReorderResponse {
-  bool accepted = 1;
-  string version = 2;
-}
-
-message GetUsersRequest {
-}
-
-message GetUsersResponse {
-  int64 version = 1;
-  repeated User user = 2;
-}
-
-message UpdateUserRequest {
-  int64 userId = 1;
-  string name = 2;
-  bool hasName = 3;
-  string nextTalk = 4;
-  bool hasNextTalk = 5;
-}
-
-message UpdateUserResponse {
-}
-
-message RemoveUserRequest {
-  int64 userId = 1;
-}
-
-message RemoveUserResponse {
-}
-
-message CompleteTalkRequest {
-  int64 userId = 1;
-}
-
-message CompleteTalkResponse {
-}
-
-message ListTalksRequest {
-}
-
-message ListTalksResponse {
-  repeated Talk talk = 1;
 }
 
 service ApiService {
@@ -118,57 +35,9 @@ service ApiService {
     };
   }
 
-  rpc GetUsers (GetUsersRequest) returns (GetUsersResponse) {
+  rpc RecordDelivery (RecordDeliveryRequest) returns (RecordDeliveryResponse) {
     option (google.api.http) = {
-      get: "/v1/user"
-    };
-  }
-
-  rpc AddUser (AddUserRequest) returns (AddUserResponse) {
-    option (google.api.http) = {
-      post: "/v1/user"
-      body: "*"
-    };
-  }
-
-  rpc UpdateUser (UpdateUserRequest) returns (UpdateUserResponse) {
-    option (google.api.http) = {
-      patch: "/v1/user/{userId}"
-      body: "*"
-    };
-  }
-
-  rpc RemoveUser (RemoveUserRequest) returns (RemoveUserResponse) {
-    option (google.api.http) = {
-      delete: "/v1/user/{userId}"
-    };
-  }
-
-  // Change the position of one user in the list of upcoming talks.
-  rpc Reorder (ReorderRequest) returns (ReorderResponse) {
-    option (google.api.http) = {
-      post: "/v1/reorder"
-      body: "*"
-    };
-  }
-
-  rpc AddTalk (AddTalkRequest) returns (AddTalkResponse) {
-    option (google.api.http) = {
-      post: "/v1/talk"
-      body: "*"
-    };
-  }
-
-  rpc CompleteTalk (CompleteTalkRequest) returns (CompleteTalkResponse) {
-    option (google.api.http) = {
-      post: "/v1/talk/complete"
-      body: "*"
-    };
-  }
-
-  rpc ListTalks (ListTalksRequest) returns (ListTalksResponse) {
-    option (google.api.http) = {
-      get: "/v1/talk"
+      get: "/v1/record"
     };
   }
 }
