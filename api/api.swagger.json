@@ -44,11 +44,32 @@
         },
         "parameters": [
           {
-            "name": "date",
+            "name": "delivery.date",
+            "description": "The date this delivery is for in YYYYMMDD.",
             "in": "query",
             "required": false,
-            "type": "string",
-            "format": "int64"
+            "type": "string"
+          },
+          {
+            "name": "delivery.time.hour",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "delivery.time.minute",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
+          },
+          {
+            "name": "delivery.time.second",
+            "in": "query",
+            "required": false,
+            "type": "integer",
+            "format": "int32"
           }
         ],
         "tags": [
@@ -66,9 +87,8 @@
           "description": "The date this delivery is for in YYYYMMDD."
         },
         "time": {
-          "type": "string",
-          "format": "int64",
-          "description": "The timestamp of the delivery."
+          "$ref": "#/definitions/apiLocalTime",
+          "description": "When the delivery took place."
         }
       }
     },
@@ -80,6 +100,23 @@
           "items": {
             "$ref": "#/definitions/apiDelivery"
           }
+        }
+      }
+    },
+    "apiLocalTime": {
+      "type": "object",
+      "properties": {
+        "hour": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "minute": {
+          "type": "integer",
+          "format": "int32"
+        },
+        "second": {
+          "type": "integer",
+          "format": "int32"
         }
       }
     },

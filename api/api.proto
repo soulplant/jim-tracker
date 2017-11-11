@@ -4,12 +4,18 @@ package api;
 
 import "google/api/annotations.proto";
 
+message LocalTime {
+  int32 hour = 1;
+  int32 minute = 2;
+  int32 second = 3;
+}
+
 message Delivery {
   // The date this delivery is for in YYYYMMDD.
   string date = 1;
 
-  // The timestamp of the delivery.
-  int64 time = 2;
+  // When the delivery took place.
+  LocalTime time = 2;
 }
 
 message FetchAllRequest {
@@ -21,7 +27,7 @@ message FetchAllResponse {
 }
 
 message RecordDeliveryRequest {
-  int64 date = 1;
+  Delivery delivery = 1;
 }
 
 message RecordDeliveryResponse {

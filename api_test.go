@@ -21,9 +21,12 @@ func TestStuff(t *testing.T) {
 	defer a.Close()
 	ctx := context.Background()
 	date := time.Date(2017, 1, 1, 0, 0, 0, 0, time.Local)
-	dateStr := "20170101"
+	dateStr := date.Format(dateFormat)
 	if _, err := a.RecordDelivery(ctx, &api.RecordDeliveryRequest{
-		Date: date.Unix(),
+		Delivery: &api.Delivery{
+			Date: dateStr,
+			Time: &api.LocalTime{Hour: 8, Minute: 30, Second: 0},
+		},
 	}); err != nil {
 		t.Fatal("Failed to record delivery", err)
 	}
@@ -38,7 +41,10 @@ func TestStuff(t *testing.T) {
 
 	// Record a second delivery for one second later - it should get de-duped.
 	if _, err := a.RecordDelivery(ctx, &api.RecordDeliveryRequest{
-		Date: date.Unix() + 1,
+		Delivery: &api.Delivery{
+			Date: dateStr,
+			Time: &api.LocalTime{Hour: 8, Minute: 30, Second: 1},
+		},
 	}); err != nil {
 		t.Fatal("Failed record delivery", err)
 	}
@@ -47,7 +53,7 @@ func TestStuff(t *testing.T) {
 	if len(data) != 1 {
 		t.Fatalf("Expected 1 delivery, got %d", len(data))
 	}
-	if data[0].Time != date.Unix()+1 {
+	if data[0].Time.Second != 1 {
 		t.Error("Date is not the new date")
 	}
 }

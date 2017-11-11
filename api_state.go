@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"time"
 
 	"cloud.google.com/go/datastore"
@@ -44,11 +45,20 @@ func (s *dsApiService) FetchAll(ctx context.Context, req *api.FetchAllRequest) (
 	}, nil
 }
 
+const dateFormat = "20060102"
+
 func (s *dsApiService) RecordDelivery(ctx context.Context, in *api.RecordDeliveryRequest) (*api.RecordDeliveryResponse, error) {
-	date := time.Unix(in.Date, 0).Format("20060102")
-	_, err := s.client.Put(ctx, deliveryKey(date), &api.Delivery{
-		Date: date,
-		Time: in.Date,
+	dateName := in.Delivery.Date
+	_, err := time.Parse(dateFormat, dateName)
+	if err != nil {
+		return nil, fmt.Errorf("Bad date format: '%s'", dateName)
+	}
+	if in.Delivery.Time == nil {
+		return nil, fmt.Errorf("Time required")
+	}
+	_, err = s.client.Put(ctx, deliveryKey(dateName), &api.Delivery{
+		Date: dateName,
+		Time: in.Delivery.Time,
 	})
 	if err != nil {
 		return nil, err
