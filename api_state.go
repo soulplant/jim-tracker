@@ -65,3 +65,8 @@ func (s *dsApiService) RecordDelivery(ctx context.Context, in *api.RecordDeliver
 	}
 	return &api.RecordDeliveryResponse{}, nil
 }
+
+func (s *dsApiService) ClearDelivery(ctx context.Context, in *api.ClearDeliveryRequest) (*api.ClearDeliveryResponse, error) {
+	err := s.client.Delete(ctx, deliveryKey(in.Date))
+	return &api.ClearDeliveryResponse{}, err
+}

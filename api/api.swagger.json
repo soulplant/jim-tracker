@@ -15,6 +15,32 @@
     "application/json"
   ],
   "paths": {
+    "/v1/clear": {
+      "post": {
+        "operationId": "ClearDelivery",
+        "responses": {
+          "200": {
+            "description": "",
+            "schema": {
+              "$ref": "#/definitions/apiClearDeliveryResponse"
+            }
+          }
+        },
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/apiClearDeliveryRequest"
+            }
+          }
+        ],
+        "tags": [
+          "ApiService"
+        ]
+      }
+    },
     "/v1/fetch-all": {
       "get": {
         "operationId": "FetchAll",
@@ -59,6 +85,18 @@
     }
   },
   "definitions": {
+    "apiClearDeliveryRequest": {
+      "type": "object",
+      "properties": {
+        "date": {
+          "type": "string",
+          "description": "The date this delivery is for in YYYYMMDD."
+        }
+      }
+    },
+    "apiClearDeliveryResponse": {
+      "type": "object"
+    },
     "apiDelivery": {
       "type": "object",
       "properties": {

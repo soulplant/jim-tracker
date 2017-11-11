@@ -19,7 +19,6 @@ message Delivery {
 }
 
 message FetchAllRequest {
-
 }
 
 message FetchAllResponse {
@@ -31,7 +30,14 @@ message RecordDeliveryRequest {
 }
 
 message RecordDeliveryResponse {
+}
 
+message ClearDeliveryRequest {
+  // The date this delivery is for in YYYYMMDD.
+  string date = 1;
+}
+
+message ClearDeliveryResponse {
 }
 
 service ApiService {
@@ -44,6 +50,13 @@ service ApiService {
   rpc RecordDelivery (RecordDeliveryRequest) returns (RecordDeliveryResponse) {
     option (google.api.http) = {
       post: "/v1/record"
+      body: "*"
+    };
+  }
+
+  rpc ClearDelivery (ClearDeliveryRequest) returns (ClearDeliveryResponse) {
+    option (google.api.http) = {
+      post: "/v1/clear"
       body: "*"
     };
   }

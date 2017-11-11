@@ -56,6 +56,14 @@ func TestStuff(t *testing.T) {
 	if data[0].Time.Second != 1 {
 		t.Error("Date is not the new date")
 	}
+
+	if _, err := a.ClearDelivery(ctx, &api.ClearDeliveryRequest{Date: dateStr}); err != nil {
+		t.Fatal("Failed to clear the delivery", err)
+	}
+	data = fetchAll(t, a)
+	if len(data) != 0 {
+		t.Fatalf("Expected no deliveries to be recorded, got %d", len(data))
+	}
 }
 
 func fetchAll(t *testing.T, a *dsApiService) []*api.Delivery {
